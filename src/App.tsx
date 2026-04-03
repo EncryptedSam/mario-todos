@@ -2,19 +2,20 @@ import { useEffect, useRef, useState } from 'react'
 import coinSound from "./assets/sounds/mario_coin_sound.mp3";
 import { RiDeleteBin2Line, RiEdit2Line, } from "react-icons/ri";
 import { MdOutlineAddTask } from 'react-icons/md';
+import { Route, Routes } from 'react-router-dom';
+import TodoGroupsPage from './pages/TodoGroupsPage';
+import TodoItemsPage from './pages/TodoItemsPage';
+import hexWithAlpha from './utils/hexWithAlpha';
 
-const hexWithAlpha = (hex: string, opacity: number) => {
-  // opacity: 0 → 1
-  const alpha = Math.round(opacity * 255)
-    .toString(16)
-    .padStart(2, "0");
-
-  return `${hex}${alpha}`;
-};
 
 function App() {
-  const opacity = 1;
 
+  return (
+    <Routes>
+      <Route path="/" element={<TodoGroupsPage />} />
+      <Route path="/group/:id/" element={<TodoItemsPage />} />
+    </Routes>
+  );
 
   return (
     <div

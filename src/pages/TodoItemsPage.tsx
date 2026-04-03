@@ -1,8 +1,12 @@
 import React from 'react'
+import Layout from '../components/Layout'
+import TodoItemsContainers from '../containers/TodoItemsContainers'
 
 const TodoItemsPage = () => {
     return (
-        <div>TodoItemsPage</div>
+        <Layout>
+            <TodoItemsContainers />
+        </Layout>
     )
 }
 
