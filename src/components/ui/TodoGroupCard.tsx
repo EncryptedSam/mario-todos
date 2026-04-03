@@ -19,8 +19,8 @@ const TodoGroupCard = ({ percentage, dots, readOnly }: TodoGroupProps) => {
         const el = textareaRef.current;
         if (!el) return;
 
-        el.style.height = "auto";          // reset
-        el.style.height = el.scrollHeight + "px"; // grow
+        el.style.height = "auto";
+        el.style.height = el.scrollHeight + "px";
     };
 
     const arr = Array.from({ length: dots ?? 5 });

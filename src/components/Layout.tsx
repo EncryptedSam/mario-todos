@@ -40,13 +40,9 @@ const Layout = ({ children }: Props) => {
                         backgroundSize: '130px'
                     }}
                 >
-                    <main className='h-full w-full' >
+                    <main className='flex flex-col w-full h-full px-3' >
                         {children}
                     </main>
-                    {/* <div className='absolute left-4 top-4 h-2.5 w-2.5 rounded-full bg-red-600' />
-                    <div className='absolute right-4 top-4 h-2.5 w-2.5 rounded-full bg-red-600' />
-                    <div className='absolute bottom-4 right-4 h-2.5 w-2.5 rounded-full bg-red-600' />
-                    <div className='absolute bottom-4 left-4 h-2.5 w-2.5 rounded-full bg-red-600' /> */}
                 </div>
             </div>
         </div>
