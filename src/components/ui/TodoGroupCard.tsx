@@ -23,7 +23,7 @@ const TodoGroupCard = ({ percentage, dots, readOnly }: TodoGroupProps) => {
         el.style.height = el.scrollHeight + "px";
     };
 
-    const arr = Array.from({ length: dots ?? 5 });
+    const arr = Array.from({ length: dots ?? 0 });
 
     return (
         <div className='relative p-3 group rounded-2xl bg-gray-100 text-sm flex flex-col space-x-3! space-y-2! border border-gray-200' >
