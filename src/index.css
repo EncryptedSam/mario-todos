@@ -1,0 +1,39 @@
+@import url("https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap");
+@import "tailwindcss";
+
+.luckiest-guy-regular {
+  font-family: "Luckiest Guy", cursive;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.scroll-hidden {
+  overflow: auto;
+
+  /* Firefox */
+  scrollbar-width: none;
+
+  /* IE and Edge */
+  -ms-overflow-style: none;
+}
+
+/* Chrome, Safari */
+.scroll-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes mario-bounce {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.mario-hit {
+  animation: mario-bounce 300ms ease-out;
+}
