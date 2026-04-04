@@ -105,6 +105,20 @@ const TodoItemsContainers = () => {
         setVolume(value);
     }
 
+    const getFilter = (completed: boolean) => {
+
+        if (filter == 'pending') {
+            return !completed
+        }
+        if (filter == 'completed') {
+            return completed
+        }
+
+        if (filter == 'all') {
+            return true
+        }
+    }
+
     return (
         <>
             <NavBar
@@ -140,7 +154,7 @@ const TodoItemsContainers = () => {
             >
                 {
                     items
-                        // .filter(item => item.completed)
+                        .filter(item => getFilter(item.completed))
                         .map(({ completed, content, groupId, id }) => {
                             return (
                                 <TodoItemCard
