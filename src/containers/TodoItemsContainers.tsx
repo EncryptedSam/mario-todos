@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import TodoItems from '../components/TodoItems'
 import NavBar from '../components/ui/NavBar'
 import TodoGroupCard from '../components/ui/TodoGroupCard'
 import TodoItemCard from '../components/ui/TodoItemCard'
@@ -65,20 +64,20 @@ const TodoItemsContainers = () => {
                 />
             </div>
             <div className='flex-1 pt-2.5 space-y-2.5! min-h-0 scroll-hidden overflow-auto' >
-                <TodoItemCard />
-                <TodoItemCard />
-                <TodoItemCard />
-                <TodoItemCard />
-                <TodoItemCard />
-                <TodoItemCard />
-                <TodoItemCard />
-                <TodoItemCard />
-                <TodoItemCard />
-                <TodoItemCard />
-                <TodoItemCard />
-                <TodoItemCard />
-                <TodoItemCard />
-                <TodoItemCard />
+                <TodoItemCard value='' />
+                <TodoItemCard value='' />
+                <TodoItemCard value='' />
+                <TodoItemCard value='' />
+                <TodoItemCard value='' />
+                <TodoItemCard value='' />
+                <TodoItemCard value='' />
+                <TodoItemCard value='' />
+                <TodoItemCard value='' />
+                <TodoItemCard value='' />
+                <TodoItemCard value='' />
+                <TodoItemCard value='' />
+                <TodoItemCard value='' />
+                <TodoItemCard value='' />
             </div>
             <AddNewButton type='task' />
         </>

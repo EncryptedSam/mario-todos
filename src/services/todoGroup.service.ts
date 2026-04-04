@@ -46,29 +46,34 @@ export const getGroupByIdWithStats = async (
     pending,
   };
 };
-
 export const getGroupsWithStats = async (): Promise<TodoGroupWithStats[]> => {
-  const groups = await db.todoGroups.toArray();
+  const [groups, items] = await Promise.all([
+    db.todoGroups.toArray(),
+    db.todoItems.toArray(),
+  ]);
 
-  const result: TodoGroupWithStats[] = [];
+  const map = new Map<number, { total: number; completed: number }>();
 
-  for (const group of groups) {
-    const items = await db.todoItems
-      .where("groupId")
-      .equals(group.id!)
-      .toArray();
+  for (const item of items) {
+    const stats = map.get(item.groupId) || { total: 0, completed: 0 };
 
-    const total = items.length;
-    const completed = items.filter((i) => i.completed).length;
-    const pending = total - completed;
+    stats.total += 1;
+    if (item.completed) stats.completed += 1;
 
-    result.push({
-      ...group,
-      total,
-      completed,
-      pending,
-    });
+    map.set(item.groupId, stats);
   }
 
-  return result;
+  return groups.map((group) => {
+    const stats = map.get(group.id!) || {
+      total: 0,
+      completed: 0,
+    };
+
+    return {
+      ...group,
+      total: stats.total,
+      completed: stats.completed,
+      pending: stats.total - stats.completed,
+    };
+  });
 };

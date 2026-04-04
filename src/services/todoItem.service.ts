@@ -24,3 +24,12 @@ export const updateItem = (id: number, content: string) => {
 export const deleteItem = (id: number) => {
   return db.todoItems.delete(id);
 };
+
+export const toggleItem = async (id: number) => {
+  const item = await db.todoItems.get(id);
+  if (!item) return;
+
+  return db.todoItems.update(id, {
+    completed: !item.completed,
+  });
+};

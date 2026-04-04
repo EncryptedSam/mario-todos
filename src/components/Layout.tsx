@@ -34,13 +34,13 @@ const Layout = ({ children }: Props) => {
                     <span className='self-start mt-10'>Doo</span>
                 </div>
                 <div
-                    className='relative flex flex-col flex-1 border-5 border-red-600 rounded-2xl bg-repeat overflow-hidden'
+                    className='relative flex flex-col flex-1 border-5 border-red-600 rounded-4xl bg-repeat overflow-hidden'
                     style={{
                         background: "url('/bg-mario.png')",
                         backgroundSize: '130px'
                     }}
                 >
-                    <main className='flex flex-col w-full h-full px-3' >
+                    <main className='flex flex-col w-full h-full px-2' >
                         {children}
                     </main>
                 </div>
