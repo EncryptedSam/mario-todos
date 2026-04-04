@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react'
 import coinSound from "../assets/sounds/mario_coin_sound.mp3";
-import ButtonGroup from './ui/ButtonGroup';
+import ButtonGroup from './ui/shared/ButtonGroup';
 import { RiDeleteBin2Line, RiEdit2Line } from 'react-icons/ri';
 
 interface TodoItemProps {

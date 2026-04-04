@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react'
-import ButtonGroup from './ButtonGroup';
+import ButtonGroup from './shared/ButtonGroup';
 import { RiDeleteBin2Line, RiEdit2Line } from 'react-icons/ri';
 
 
