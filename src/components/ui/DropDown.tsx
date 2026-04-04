@@ -43,15 +43,17 @@ const DropDown = ({ onChange, options = [], value }: Props) => {
             </button>
 
             {open && (
-                <div className='absolute flex flex-col text-sm space-y-2 py-3 min-w-30 top-[calc(100%+4px)] rounded-xl border border-gray-200 bg-gray-100 z-10'>
+                <div className='absolute flex flex-col text-sm py-3 min-w-30 top-[calc(100%+4px)] rounded-xl border border-gray-200 bg-gray-100 z-10'>
                     {options.map((opt) => {
                         const isActive = opt.value === value
                         return (
                             <button
                                 key={opt.value}
                                 onClick={() => handleSelect(opt.value)}
-                                className={`px-3 text-left py-0.5 ${isActive ? 'text-gray-100 bg-blue-500' : ''
-                                    }`}
+                                className={`
+                                    px-3 text-left py-0.5 hover:bg-gray-200 cursor-pointer
+                                    ${isActive ? 'text-gray-100 bg-blue-500!' : ''}`
+                                }
                             >
                                 {opt.lable ?? opt.value}
                             </button>
