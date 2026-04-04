@@ -2,16 +2,19 @@ import React, { useEffect, useState } from 'react'
 import NavBar from '../components/ui/NavBar'
 import TodoGroupCard from '../components/ui/TodoGroupCard'
 import AddNewButton from '../components/ui/AddNewButton'
-import { createGroup, getGroups, updateGroup, deleteGroup } from '../services/todoGroup.service'
-import type { TodoGroup } from '../db/schema'
+import { createGroup, getGroupsWithStats, updateGroup, deleteGroup } from '../services/todoGroup.service'
+import type { TodoGroupWithStats } from '../db/schema'
+import { useNavigate } from 'react-router-dom'
 
 const TodoGroupsContainers = () => {
     const [filter, setFilter] = useState<string>('all');
     const [volume, setVolume] = useState<number>(10);
-    const [groups, setGroups] = useState<TodoGroup[]>([]);
+    const [groups, setGroups] = useState<TodoGroupWithStats[]>([]);
+    const navigate = useNavigate();
+
 
     const loadRows = async () => {
-        const rows = await getGroups();
+        const rows = await getGroupsWithStats();
         setGroups(rows);
     }
 
@@ -54,13 +57,21 @@ const TodoGroupsContainers = () => {
             />
             <div className='flex-1 pt-2.5 space-y-2.5! min-h-0 scroll-hidden overflow-auto' >
                 {
-                    groups.map(({ id, title }) => {
+                    groups.map(({ id, title, completed, total }) => {
+
+                        let percentage = (completed / total) * 100;
+                        if (total == 0) {
+                            percentage = 0;
+                        }
+
                         return (
                             <TodoGroupCard
                                 key={`todo_group_${id}`}
                                 onChange={(value) => { handleCardChange(Number(id), value) }}
                                 value={title}
                                 onDelete={() => { handleDelete(Number(id)) }}
+                                percentage={percentage}
+                                onClick={() => { navigate(`/group/${id}/`); }}
                             />
                         )
                     })

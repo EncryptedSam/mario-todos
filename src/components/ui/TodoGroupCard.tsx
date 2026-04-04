@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import ButtonGroup from './shared/ButtonGroup';
-import { RiDeleteBin2Line, RiEdit2Line } from 'react-icons/ri';
+import { MdDeleteOutline, MdOutlineEdit, MdOutlineEditOff } from 'react-icons/md';
 
 interface TodoGroupProps {
     type?: 'progress' | 'step';
@@ -9,11 +9,12 @@ interface TodoGroupProps {
     onDelete?(): void;
     value: string;
     onChange?(value: string): void;
+    onClick?(): void;
 }
 
 const DEBOUNCE_DELAY = 400;
 
-const TodoGroupCard = ({ percentage, readOnly, value, onChange, onDelete }: TodoGroupProps) => {
+const TodoGroupCard = ({ percentage, readOnly, value, onChange, onDelete, onClick }: TodoGroupProps) => {
     const [text, setText] = useState(value);
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -47,9 +48,21 @@ const TodoGroupCard = ({ percentage, readOnly, value, onChange, onDelete }: Todo
         }, DEBOUNCE_DELAY);
     };
 
+    const handleClick = () => {
+        if (isEdit) return;
+        onClick?.();
+    }
+
     useEffect(() => {
         if (isEdit && textareaRef.current) {
-            textareaRef.current.focus();
+            const el = textareaRef.current;
+
+            el.focus();
+
+            // move cursor to end
+            const length = el.value.length;
+            el.setSelectionRange(length, length);
+
             autoResize();
         }
     }, [isEdit]);
@@ -71,36 +84,58 @@ const TodoGroupCard = ({ percentage, readOnly, value, onChange, onDelete }: Todo
         };
     }, []);
 
+
+    let buttonGroupButtons = [
+        {
+            icon: <MdOutlineEdit className='text-gray-700' />,
+            onClick: () => { setIsEdit(true) }
+        },
+        {
+            icon: <MdDeleteOutline className='text-red-500' />,
+            onClick: onDelete
+        }
+    ]
+
+    if (isEdit) {
+        buttonGroupButtons = [
+            {
+                icon: <MdOutlineEditOff className='text-gray-700' />,
+                onClick: () => { setIsEdit(false) }
+            },
+            {
+                icon: <MdDeleteOutline className='text-red-500' />,
+                onClick: onDelete
+            }
+        ]
+    }
+
     return (
         <div
             ref={containerRef}
-            className='relative p-3 group rounded-2xl bg-gray-100 text-sm flex flex-col space-x-3! space-y-2! border border-gray-200'
+            className={`
+                relative p-3 group rounded-2xl bg-gray-100 text-sm flex flex-col space-x-3! space-y-2! border border-gray-200 
+                ${!isEdit && 'cursor-pointer'}
+            `}
+            onClick={handleClick}
         >
-            {(!readOnly && !isEdit) && (
+
+            {!readOnly && (
                 <ButtonGroup
-                    buttons={[
-                        {
-                            icon: <RiEdit2Line className='text-gray-700' />,
-                            onClick: () => { setIsEdit(true) }
-                        },
-                        {
-                            icon: <RiDeleteBin2Line className='text-red-500' />,
-                            onClick: onDelete
-                        }
-                    ]}
+                    buttons={buttonGroupButtons}
                     top={-10}
                     right={0}
+                    alwaysVisible={isEdit}
                 />
             )}
 
             <div className='flex w-full text-sm font-medium'>
                 <textarea
                     ref={textareaRef}
+                    className={`flex-1 resize-none overflow-hidden bg-transparent outline-none ${!isEdit && 'cursor-pointer pointer-events-none'}`}
                     value={text}
                     onChange={(e) => handleChange(e.target.value)}
                     rows={1}
                     placeholder="Untitled"
-                    className='flex-1 resize-none overflow-hidden bg-transparent outline-none'
                     disabled={!isEdit}
                 />
                 <span className='inline-flex shrink-0 items-end w-10 justify-end'>

@@ -2,7 +2,7 @@ import { db } from "../db";
 
 // CREATE
 export const createItem = (groupId: number, content: string) => {
-  return db.todoItems.add({ groupId, content });
+  return db.todoItems.add({ groupId, content, completed: false });
 };
 
 // READ BY GROUP
