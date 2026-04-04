@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { BiChevronDown } from 'react-icons/bi';
 
-interface Props {
+export interface Props {
     onChange?(value: string): void;
     options?: { lable?: string, value: string }[]
     value: string

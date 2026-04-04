@@ -3,10 +3,15 @@ import NavBar from './ui/NavBar'
 import TodoGroupCard from './ui/TodoGroupCard'
 import AddNewButton from './ui/AddNewButton'
 
-const TodoGroups = () => {
+interface Props {
+
+}
+
+
+const TodoGroups = ({ }: Props) => {
     return (
         < >
-            <NavBar />
+            {/* <NavBar  />
             <div className='flex-1 pt-2.5 space-y-2.5! min-h-0 scroll-hidden overflow-auto' >
                 <TodoGroupCard />
                 <TodoGroupCard />
@@ -28,7 +33,7 @@ const TodoGroups = () => {
                 <TodoGroupCard />
                 <TodoGroupCard />
             </div>
-            <AddNewButton type='group' />
+            <AddNewButton type='group' /> */}
         </>
     )
 }
