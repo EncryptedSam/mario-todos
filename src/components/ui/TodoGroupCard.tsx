@@ -21,7 +21,6 @@ const TodoGroupCard = ({ percentage, readOnly, value, onChange, onDelete, onClic
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [isEdit, setIsEdit] = useState<boolean>(false);
 
-    // sync external value
     useEffect(() => {
         setText(value);
     }, [value]);
@@ -38,7 +37,6 @@ const TodoGroupCard = ({ percentage, readOnly, value, onChange, onDelete, onClic
         setText(val);
         autoResize();
 
-        // debounce
         if (debounceRef.current) {
             clearTimeout(debounceRef.current);
         }
@@ -114,7 +112,7 @@ const TodoGroupCard = ({ percentage, readOnly, value, onChange, onDelete, onClic
             ref={containerRef}
             className={`
                 relative p-3 group rounded-2xl bg-gray-100 text-sm flex flex-col space-x-3! space-y-2! border border-gray-200 
-                ${!isEdit && 'cursor-pointer'}
+                ${!isEdit && !readOnly && 'cursor-pointer'}
             `}
             onClick={handleClick}
         >
