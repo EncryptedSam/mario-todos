@@ -15,21 +15,17 @@ export const getItemById = (id: number) => {
   return db.todoItems.get(id);
 };
 
-// UPDATE
-export const updateItem = (id: number, content: string) => {
+// UPDATE CONTENT
+export const updateItemContent = (id: number, content: string) => {
   return db.todoItems.update(id, { content });
+};
+
+// UPDATE COMPLETED
+export const updateItemCompleted = (id: number, completed: boolean) => {
+  return db.todoItems.update(id, { completed });
 };
 
 // DELETE
 export const deleteItem = (id: number) => {
   return db.todoItems.delete(id);
-};
-
-export const toggleItem = async (id: number) => {
-  const item = await db.todoItems.get(id);
-  if (!item) return;
-
-  return db.todoItems.update(id, {
-    completed: !item.completed,
-  });
 };

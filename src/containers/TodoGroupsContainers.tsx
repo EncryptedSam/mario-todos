@@ -5,10 +5,11 @@ import AddNewButton from '../components/ui/AddNewButton'
 import { createGroup, getGroupsWithStats, updateGroup, deleteGroup } from '../services/todoGroup.service'
 import type { TodoGroupWithStats } from '../db/schema'
 import { useNavigate } from 'react-router-dom'
+import { getVolume, setVolume } from '../services/settings.service'
 
 const TodoGroupsContainers = () => {
     const [filter, setFilter] = useState<string>('all');
-    const [volume, setVolume] = useState<number>(10);
+    const [localVolume, setLocalVolume] = useState<number>(0);
     const [groups, setGroups] = useState<TodoGroupWithStats[]>([]);
     const navigate = useNavigate();
 
@@ -18,6 +19,11 @@ const TodoGroupsContainers = () => {
         setGroups(rows);
     }
 
+    const loadVolume = async () => {
+        const volume = await getVolume();
+        setLocalVolume(volume);
+    }
+
     const handleCreateGroup = async () => {
         await createGroup('');
         await loadRows();
@@ -25,6 +31,7 @@ const TodoGroupsContainers = () => {
 
     useEffect(() => {
         loadRows();
+        loadVolume();
     }, [])
 
     const handleCardChange = async (id: number, value: string) => {
@@ -35,6 +42,11 @@ const TodoGroupsContainers = () => {
     const handleDelete = async (id: number) => {
         await deleteGroup(id);
         await loadRows();
+    }
+
+    const handleVolume = async (value: number) => {
+        setLocalVolume(value);
+        setVolume(value);
     }
 
     return (
@@ -51,8 +63,8 @@ const TodoGroupsContainers = () => {
                 }}
 
                 volumeSlider={{
-                    value: volume,
-                    onChange: setVolume
+                    value: localVolume,
+                    onChange: (value) => { handleVolume(value) }
                 }}
             />
             <div className='flex-1 pt-2.5 space-y-2.5! min-h-0 scroll-hidden overflow-auto' >

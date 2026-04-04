@@ -10,20 +10,18 @@ interface TodoGroupProps {
     value: string;
     onChange?(value: string): void;
     onClick?(): void;
+    taskCount?: number
 }
 
 const DEBOUNCE_DELAY = 400;
 
-const TodoGroupCard = ({ percentage, readOnly, value, onChange, onDelete, onClick }: TodoGroupProps) => {
+const TodoGroupCard = ({ percentage, readOnly, value, onChange, onDelete, onClick, taskCount }: TodoGroupProps) => {
     const [text, setText] = useState(value);
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [isEdit, setIsEdit] = useState<boolean>(false);
 
-    useEffect(() => {
-        setText(value);
-    }, [value]);
 
     const autoResize = () => {
         const el = textareaRef.current;
@@ -32,6 +30,11 @@ const TodoGroupCard = ({ percentage, readOnly, value, onChange, onDelete, onClic
         el.style.height = "auto";
         el.style.height = el.scrollHeight + "px";
     };
+
+    useEffect(() => {
+        setText(value);
+        autoResize();
+    }, [value]);
 
     const handleChange = (val: string) => {
         setText(val);
@@ -107,6 +110,8 @@ const TodoGroupCard = ({ percentage, readOnly, value, onChange, onDelete, onClic
         ]
     }
 
+    const dots = Array.from({ length: taskCount ?? 0 }, (_, i) => i);
+
     return (
         <div
             ref={containerRef}
@@ -137,7 +142,7 @@ const TodoGroupCard = ({ percentage, readOnly, value, onChange, onDelete, onClic
                     disabled={!isEdit}
                 />
                 <span className='inline-flex shrink-0 items-end w-10 justify-end'>
-                    {percentage ?? 30}%
+                    {percentage?.toFixed(0) ?? 0}%
                 </span>
             </div>
 
@@ -146,6 +151,15 @@ const TodoGroupCard = ({ percentage, readOnly, value, onChange, onDelete, onClic
                     className="h-full bg-blue-500 transition-all duration-300 rounded-full"
                     style={{ width: `${percentage ?? 30}%` }}
                 />
+                <div className='absolute top-0 left-0 flex w-full h-full items-center justify-between' >
+                    {
+                        dots.map(() => {
+                            return (
+                                <span className='w-1.5 h-1.5 bg-gray-100 rounded-full first-of-type:opacity-0 last-of-type:opacity-0' />
+                            )
+                        })
+                    }
+                </div>
             </div>
         </div>
     );
