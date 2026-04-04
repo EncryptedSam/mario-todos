@@ -5,11 +5,11 @@ interface Props {
     children?: React.ReactNode
 }
 
-
 const Layout = ({ children }: Props) => {
+
     return (
         <div
-            className='w-screen h-screen flex justify-center items-center bg-gray-950'
+            className='w-screen h-screen flex justify-center items-center bg-gray-950 p-2'
             style={{
                 backgroundImage: `
                 repeating-linear-gradient(
@@ -22,7 +22,7 @@ const Layout = ({ children }: Props) => {
             `
             }}
         >
-            <div className='relative pt-20! h-[calc(100vh-100px)] w-110 flex flex-col'>
+            <div className='relative pt-20! max-h-215 h-screen w-110 flex flex-col'>
                 <div className='absolute w-full flex justify-center luckiest-guy-regular items-center top-0 z-10 text-gray-100 font-bold space-x-3! text-4xl pointer-events-none'>
                     <span className='self-start mt-10'>Lets</span>
                     <div

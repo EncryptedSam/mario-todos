@@ -23,7 +23,7 @@ const NavBar = () => {
                     ]}
                 />
             </div>
-            <VolumeSlider width='w-18' height='h-2' />
+            <VolumeSlider className='w-30' />
         </div>
     )
 }
