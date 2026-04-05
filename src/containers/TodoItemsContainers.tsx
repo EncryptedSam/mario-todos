@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom'
 import { getGroupByIdWithStats } from '../services/todoGroup.service'
 import { useParams } from "react-router-dom";
 import type { TodoGroupWithStats, TodoItem } from '../db/schema'
-import { getVolume, setVolume } from '../services/settings.service'
+import { getVolume, setVolume, getConfetti, setConfetti } from '../services/settings.service'
 import { getItemsByGroup, createItem, updateItemCompleted, updateItemContent, deleteItem } from '../services/todoItem.service'
 import Confetti from 'react-confetti'
 
@@ -18,6 +18,7 @@ const TodoItemsContainers = () => {
     const [filter, setFilter] = useState<string>('all');
     const [localVolume, setLocalVolume] = useState<number>(0);
     const [itemId, setItemId] = useState<number | null>(null);
+    const [showConfetti, setShowConfetti] = useState<boolean>(true);
 
     const [group, setGroup] = useState<TodoGroupWithStats>();
     const [items, setItems] = useState<TodoItem[]>([]);
@@ -25,8 +26,10 @@ const TodoItemsContainers = () => {
     const listRef = useRef<HTMLDivElement | null>(null);
     const itemIdTimeoutRef = useRef<number | undefined>(undefined);
 
-
-
+    const loadConfetti = async () => {
+        const confetti = await getConfetti();
+        setShowConfetti(confetti);
+    }
 
     const loadVolume = async () => {
         const volume = await getVolume();
@@ -45,6 +48,7 @@ const TodoItemsContainers = () => {
 
     useEffect(() => {
         (async () => {
+            await loadConfetti();
             await loadVolume();
             await loadGroup();
             await loadItems();
@@ -61,6 +65,8 @@ const TodoItemsContainers = () => {
     }
 
     const handleCreateItem = async () => {
+        setFilter('all');
+
         const res = await createItem(Number(groupId), '');
         await loadItems();
         await loadGroup();
@@ -105,6 +111,11 @@ const TodoItemsContainers = () => {
         setVolume(value);
     }
 
+    const handleConfetti = async () => {
+        setShowConfetti(!showConfetti);
+        setConfetti(!showConfetti);
+    }
+
     const getFilter = (completed: boolean) => {
 
         if (filter == 'pending') {
@@ -138,6 +149,10 @@ const TodoItemsContainers = () => {
                 }}
 
                 onClickBack={() => { navigate(`/`); }}
+
+                confettiValue={showConfetti}
+                onClickConfetti={handleConfetti}
+                showConfetti={percentage == 100}
             />
             <div className='relative  pt-2 pb-2 min-h-0 scroll-hidden overflow-auto' >
                 <TodoGroupCard
@@ -146,7 +161,7 @@ const TodoItemsContainers = () => {
                     taskCount={items.length + 2}
                     readOnly
                 />
-                <hr className='absolute opacity-50 bottom-0 left-0 right-0 m-auto w-[calc(100%-10px)] border-0 border-b-2 border-gray-200' />
+                <hr className='absolute opacity-60 bottom-0 left-0 right-0 m-auto w-[calc(100%-15px)] border-0 border-b-2 border-gray-200' />
             </div>
             <div
                 ref={listRef}
@@ -177,7 +192,7 @@ const TodoItemsContainers = () => {
                 onClick={handleCreateItem}
             />
             {
-                percentage == 100 &&
+                (showConfetti && percentage == 100) &&
                 <Confetti recycle={true} />
             }
         </>
