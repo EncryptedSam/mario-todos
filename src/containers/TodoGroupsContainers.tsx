@@ -13,7 +13,6 @@ const TodoGroupsContainers = () => {
     const [groups, setGroups] = useState<TodoGroupWithStats[]>([]);
     const navigate = useNavigate();
 
-
     const loadRows = async () => {
         const rows = await getGroupsWithStats();
         setGroups(rows);

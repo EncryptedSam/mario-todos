@@ -27,7 +27,7 @@ const TodoItemCard = ({
     onDelete,
     volume,
     onHitEnter,
-    focus
+    focus,
 }: Props) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [text, setText] = useState(value);
@@ -189,13 +189,19 @@ const TodoItemCard = ({
 
             <textarea
                 ref={textareaRef}
-                className='flex-1 resize-none overflow-hidden bg-transparent outline-none'
+                className={`flex-1 resize-none overflow-hidden bg-transparent outline-none ${!isEdit && 'cursor-pointer select-none'}`}
                 onChange={(e) => handleTextareaChange(e.target.value)}
                 onKeyDown={handleKeyDown}
                 rows={1}
                 placeholder="Untitled"
                 value={text}
-                disabled={!isEdit}
+                readOnly={!isEdit}
+                onMouseDown={(e) => {
+                    if (!isEdit) e.preventDefault();
+                }}
+                onDoubleClick={(e) => {
+                    setIsEdit(true);
+                }}
             />
         </div>
     );
