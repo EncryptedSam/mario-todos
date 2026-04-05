@@ -185,3 +185,18 @@ const TodoItemsContainers = () => {
 }
 
 export default TodoItemsContainers
+
+
+// type BaseType = { id: number, sortOrder: number };
+
+// function reorderSort<T extends BaseType>(array: T[]) {
+
+// }
+
+// type Item = { id: number, sortOrder: number, content: string }
+
+// let ary: Item[] = [];
+
+// reorderSort(ary);
+
+

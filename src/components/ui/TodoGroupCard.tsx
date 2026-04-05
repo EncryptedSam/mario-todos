@@ -148,14 +148,14 @@ const TodoGroupCard = ({ percentage, readOnly, value, onChange, onDelete, onClic
 
             <div className="relative w-full h-2 bg-gray-300 rounded overflow-hidden">
                 <div
-                    className="h-full bg-blue-500 transition-all duration-300 rounded-full"
+                    className="h-full bg-red-500 transition-all duration-300 rounded-full"
                     style={{ width: `${percentage ?? 30}%` }}
                 />
                 <div className='absolute top-0 left-0 flex w-full h-full items-center justify-between' >
                     {
                         dots.map(() => {
                             return (
-                                <span className='w-1.5 h-1.5 bg-gray-100 rounded-full first-of-type:opacity-0 last-of-type:opacity-0' />
+                                <span className='w-1.5 h-1.5 bg-yellow-400 rounded-full first-of-type:opacity-0 last-of-type:opacity-0' />
                             )
                         })
                     }
