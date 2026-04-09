@@ -10,8 +10,8 @@ class AppDB extends Dexie {
     super("TodoAppDB");
 
     this.version(1).stores({
-      todoGroups: "++id, title",
-      todoItems: "++id, groupId",
+      todoGroups: "++id, title, sortOrder",
+      todoItems: "++id, groupId, [groupId+sortOrder], sortOrder",
       settings: "key",
     });
   }

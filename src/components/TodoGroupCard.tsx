@@ -11,11 +11,12 @@ interface TodoGroupProps {
     onChange?(value: string): void;
     onClick?(): void;
     taskCount?: number
+    tasksCompleted?: number;
 }
 
 const DEBOUNCE_DELAY = 400;
 
-const TodoGroupCard = ({ percentage, readOnly, value, onChange, onDelete, onClick, taskCount }: TodoGroupProps) => {
+const TodoGroupCard = ({ percentage, readOnly, value, onChange, onDelete, onClick, taskCount, tasksCompleted = 0 }: TodoGroupProps) => {
     const [text, setText] = useState(value);
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -146,19 +147,36 @@ const TodoGroupCard = ({ percentage, readOnly, value, onChange, onDelete, onClic
                 </span>
             </div>
 
-            <div className="relative w-full h-2 bg-gray-300 rounded overflow-hidden">
-                <div
+            <div className="relative w-full h-2 rounded-full overflow-hidden">
+                {/* <div
                     className="h-full bg-red-500 transition-all duration-300 rounded-full"
                     style={{ width: `${percentage ?? 30}%` }}
-                />
-                <div className='absolute top-0 left-0 flex w-full h-full items-center justify-between' >
+                /> */}
+                <div className='absolute space-x-1 top-0 left-0 flex w-full h-full items-center justify-between' >
                     {
-                        dots.map(() => {
+                        dots.map((_, idx) => {
                             return (
-                                <span className='w-1.5 h-1.5 bg-yellow-400 rounded-full first-of-type:opacity-0 last-of-type:opacity-0' />
+                                <span
+                                    key={`${idx}`}
+                                    className={`
+                                        flex-1 w-2 h-full rounded-full
+                                        ${idx < tasksCompleted ? 'bg-red-500' : 'bg-gray-300 '}
+                                        `
+                                    }
+                                />
                             )
                         })
                     }
+                    {/* {
+                        dots.map((_, idx) => {
+                            return (
+                                <span
+                                    key={`${idx}`}
+                                    className='w-1.5 h-1.5 bg-yellow-400 rounded-full first-of-type:opacity-0 last-of-type:opacity-0'
+                                />
+                            )
+                        })
+                    } */}
                 </div>
             </div>
         </div>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import NavBar from '../components/ui/NavBar'
-import TodoGroupCard from '../components/ui/TodoGroupCard'
-import AddNewButton from '../components/ui/AddNewButton'
+import NavBar from '../components/NavBar'
+import TodoGroupCard from '../components/TodoGroupCard'
+import AddNewButton from '../components/AddNewButton'
 import { createGroup, getGroupsWithStats, updateGroup, deleteGroup } from '../services/todoGroup.service'
 import type { TodoGroupWithStats } from '../db/schema'
 import { useNavigate } from 'react-router-dom'
@@ -48,6 +48,8 @@ const TodoGroupsContainers = () => {
         setVolume(value);
     }
 
+    console.log(groups);
+
     return (
         < >
             <NavBar
@@ -83,6 +85,8 @@ const TodoGroupsContainers = () => {
                                 onDelete={() => { handleDelete(Number(id)) }}
                                 percentage={percentage}
                                 onClick={() => { navigate(`/group/${id}/`); }}
+                                tasksCompleted={completed}
+                                taskCount={total}
                             />
                         )
                     })

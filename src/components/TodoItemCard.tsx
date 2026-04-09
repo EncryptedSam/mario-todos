@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react'
-import coinSound from "../../assets/sounds/mario_coin_sound.mp3";
-import ButtonGroup from './shared/ButtonGroup';
+import React, { useEffect, useRef, useState, forwardRef } from 'react'
+import coinSound from "../assets/sounds/mario_coin_sound.mp3";
+import ButtonGroup, { type Props as ButtonGroupProps } from './shared/ButtonGroup';
 import { MdCheck, MdClose, MdDeleteOutline, MdOutlineEdit, MdOutlineEditOff } from 'react-icons/md';
+import useEscape from '../hooks/useEscape';
 
 interface Props {
     value: string
@@ -15,11 +16,20 @@ interface Props {
 
     onHitEnter?(): void;
     focus?: boolean;
+
+    // 👇 drag events
+    onDragStart?(e: React.DragEvent<HTMLDivElement>): void;
+    onDragOver?(e: React.DragEvent<HTMLDivElement>): void;
+    onDrop?(e: React.DragEvent<HTMLDivElement>): void;
+    onDragEnter?(e: React.DragEvent<HTMLDivElement>): void;
+    onDragLeave?(e: React.DragEvent<HTMLDivElement>): void;
+    onDragEnd?(e: React.DragEvent<HTMLDivElement>): void;
+    hide?: boolean;
 }
 
 const DEBOUNCE_DELAY = 400;
 
-const TodoItemCard = ({
+const TodoItemCard = forwardRef<HTMLDivElement, Props>(({
     value,
     onChangeText,
     checked = false,
@@ -28,7 +38,14 @@ const TodoItemCard = ({
     volume,
     onHitEnter,
     focus,
-}: Props) => {
+    onDragStart,
+    onDragOver,
+    onDrop,
+    onDragEnter,
+    onDragLeave,
+    onDragEnd,
+    hide
+}: Props, ref) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [text, setText] = useState(value);
     const [isChecked, setIsChecked] = useState<boolean>(checked);
@@ -36,6 +53,11 @@ const TodoItemCard = ({
     const debounceRef = useRef<number | null>(null);
     const [isEdit, setIsEdit] = useState<boolean>(false);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+
+    useEscape(() => {
+        setIsEdit(false);
+        setIsDeleteConfirmOpen(false);
+    });
 
     const autoResize = () => {
         const el = textareaRef.current;
@@ -122,7 +144,7 @@ const TodoItemCard = ({
         }
     };
 
-    let buttonGroupButtons = [
+    let buttonGroupButtons: ButtonGroupProps['buttons'] = [
         {
             icon: <MdOutlineEdit className='text-gray-700' />,
             onClick: () => { setIsEdit(true) }
@@ -149,6 +171,9 @@ const TodoItemCard = ({
     if (isDeleteConfirmOpen) {
         buttonGroupButtons = [
             {
+                text: 'Are you sure want to delete?',
+            },
+            {
                 icon: <MdCheck className='text-red-500 ' />,
                 onClick: () => { onDelete?.() }
             },
@@ -161,14 +186,35 @@ const TodoItemCard = ({
 
     return (
         <div
-            ref={containerRef}
-            className='relative p-3 group rounded-2xl bg-gray-100 text-sm flex space-x-3! border border-gray-200'
+            ref={(el) => {
+                containerRef.current = el;
+
+                if (typeof ref === "function") {
+                    ref(el);
+                } else if (ref) {
+                    (ref as React.MutableRefObject<HTMLDivElement | null>).current = el;
+                }
+            }}
+            className={`
+                relative p-3 group rounded-2xl bg-gray-100 text-sm flex space-x-3! border border-gray-200
+                ${isEdit ? 'border-red-200 bg-red-100' : ''}
+                `
+            }
+            style={{ opacity: hide ? 0 : 1 }}
+            draggable={true}
+            onDragStart={onDragStart}
+            onDragOver={onDragOver}
+            onDrop={onDrop}
+            onDragEnter={onDragEnter}
+            onDragLeave={onDragLeave}
+            onDragEnd={onDragEnd}
         >
             <ButtonGroup
                 buttons={buttonGroupButtons}
                 top={-10}
                 right={0}
-                alwaysVisible={isEdit}
+                alwaysVisible={isEdit || isDeleteConfirmOpen}
+                selected={isEdit || isDeleteConfirmOpen}
             />
 
             {isChecked ? (
@@ -196,15 +242,15 @@ const TodoItemCard = ({
                 placeholder="Untitled"
                 value={text}
                 readOnly={!isEdit}
-                onMouseDown={(e) => {
-                    if (!isEdit) e.preventDefault();
-                }}
+                // onMouseDown={(e) => {
+                //     if (!isEdit) e.preventDefault();
+                // }}
                 onDoubleClick={(e) => {
                     setIsEdit(true);
                 }}
             />
         </div>
     );
-};
+});
 
 export default TodoItemCard;
