@@ -12,6 +12,7 @@ import { getItemsByGroup, createItem, updateItemCompleted, updateItemContent, de
 import Confetti from 'react-confetti'
 import reorderByIndex from '../utils/reorderByIndex'
 import { BsExclamation, BsExclamationCircle } from 'react-icons/bs'
+import DeleteAlertModal from '../components/DeleteAlertModal'
 
 
 function moveRowsManual<T>(array: T[], fromIndex: number, toIndex: number): T[] {
@@ -41,6 +42,8 @@ const TodoItemsContainers = () => {
 
     const [hoverIndex, setHoverIndex] = useState<number | null>(null);
     const [hoverOrder, setHoverOrder] = useState<number | null>(null);
+
+    const [deleteId, setDeleteId] = useState<number | null>(null);
 
     const [filter, setFilter] = useState<string>('all');
     const [localVolume, setLocalVolume] = useState<number>(0);
@@ -133,10 +136,11 @@ const TodoItemsContainers = () => {
         await loadItems();
     }
 
-    const handleDeleteItem = async (id: number) => {
-        await deleteItem(Number(id));
+    const handleDeleteItem = async () => {
+        await deleteItem(Number(deleteId));
         await loadItems();
         await loadGroup();
+        setDeleteId(null)
     }
 
     const handleVolume = async (value: number) => {
@@ -308,12 +312,14 @@ const TodoItemsContainers = () => {
                                         else itemRefs.current.delete(Number(id));
                                     }}
                                     key={`todo_item_${id}`}
+                                    onDelete={() => { setDeleteId(Number(id)) }}
+
                                     value={content}
                                     checked={completed}
                                     onClickCheck={(value) => { handleUpdateCompleted(Number(id), value) }}
                                     onChangeText={(value) => { handleUpdateContent(Number(id), value) }}
-                                    onDelete={() => { handleDeleteItem(Number(id)) }}
                                     volume={(localVolume / 100) * 1}
+
                                     onHitEnter={() => { handleCreateItem(Number(sortOrder) + 1) }}
                                     focus={id == inputFocusId}
                                     hide={dragOrder == sortOrder}
@@ -334,7 +340,13 @@ const TodoItemsContainers = () => {
                 (showConfetti && percentage == 100) &&
                 <Confetti recycle={true} />
             }
-
+            {
+                deleteId &&
+                <DeleteAlertModal
+                    onCancel={() => { setDeleteId(null) }}
+                    onDelete={handleDeleteItem}
+                />
+            }
         </>
     )
 }
