@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState, forwardRef } from 'react'
 import coinSound from "../assets/sounds/mario_coin_sound.mp3";
-import ButtonGroup, { type Props as ButtonGroupProps } from './shared/ButtonGroup';
-import { MdCheck, MdClose, MdDeleteOutline, MdOutlineEdit, MdOutlineEditOff } from 'react-icons/md';
+import { MdDeleteOutline, MdOutlineEdit } from 'react-icons/md';
 import useEscape from '../hooks/useEscape';
-import { BsThreeDotsVertical } from 'react-icons/bs';
+import SideDropMenu from './shared/SideDropMenu';
 
 interface Props {
     value: string
@@ -146,45 +145,6 @@ const TodoItemCard = forwardRef<HTMLDivElement, Props>(({
         }
     };
 
-    let buttonGroupButtons: ButtonGroupProps['buttons'] = [
-        {
-            icon: <MdOutlineEdit className='text-gray-700' />,
-            onClick: () => { setIsEdit(true) }
-        },
-        {
-            icon: <MdDeleteOutline className='text-red-500' />,
-            onClick: () => { setIsDeleteConfirmOpen(true) }
-        }
-    ]
-
-    if (isEdit) {
-        buttonGroupButtons = [
-            {
-                icon: <MdOutlineEditOff className='text-gray-700' />,
-                onClick: () => { setIsEdit(false) }
-            },
-            {
-                icon: <MdDeleteOutline className='text-red-500' />,
-                onClick: () => { setIsDeleteConfirmOpen(true) }
-            }
-        ]
-    }
-
-    if (isDeleteConfirmOpen) {
-        buttonGroupButtons = [
-            {
-                text: 'Are you sure want to delete?',
-            },
-            {
-                icon: <MdCheck className='text-red-500 ' />,
-                onClick: () => { onDelete?.() }
-            },
-            {
-                icon: <MdClose className='text-gray-700' />,
-                onClick: () => { setIsDeleteConfirmOpen(false) }
-            }
-        ]
-    }
 
     return (
         <div
@@ -230,7 +190,7 @@ const TodoItemCard = forwardRef<HTMLDivElement, Props>(({
                 />
             )}
 
-            <div className='relative flex-1' >
+            <div className='relative flex flex-1' >
                 <textarea
                     ref={textareaRef}
                     className={`
@@ -248,82 +208,29 @@ const TodoItemCard = forwardRef<HTMLDivElement, Props>(({
                 {!isEdit &&
                     <div
                         className='absolute top-0 left-0 w-full h-full cursor-pointer'
-                        onDoubleClick={(e) => {
+                        onDoubleClick={() => {
                             setIsEdit(true);
                         }}
                     />
                 }
             </div>
 
-            <SideDropMenu />
+            <SideDropMenu
+                options={[
+                    {
+                        icon: <MdOutlineEdit className='text-gray-700' />,
+                        label: 'Edit',
+                        onClick: () => { setIsEdit(true) }
+                    },
+                    {
+                        icon: <MdDeleteOutline className='text-red-500' />,
+                        label: 'Delete',
+                        onClick: () => { onDelete?.() }
+                    }
+                ]}
+            />
         </div>
     );
 });
 
 export default TodoItemCard;
-
-
-const SideDropMenu = () => {
-    const [showMenu, setShowMenu] = useState<boolean>(false);
-    const containerRef = useRef<HTMLDivElement | null>(null);
-
-    useEscape(() => {
-        setShowMenu(false);
-    });
-
-    useEffect(() => {
-        const handleClickOutside = (e: MouseEvent) => {
-            if (
-                containerRef.current &&
-                !containerRef.current.contains(e.target as Node)
-            ) {
-                setShowMenu(false);
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, []);
-
-
-    return (
-        <div
-            ref={containerRef}
-            className='relative rounded-full cursor-pointer h-5'
-        >
-            <button
-                className='inline-flex text-gray-400 hover:text-gray-600 text-sm items-center justify-center shrink-0 grow-0 w-5 h-5 cursor-pointer'
-                onClick={() => { setShowMenu(!showMenu) }}
-            >
-                <BsThreeDotsVertical />
-            </button>
-
-            {showMenu &&
-
-                <div
-                    className='absolute flex flex-col text-sm py-3 min-w-30 right-[calc(100%+4px)] top-0 rounded-xl border border-gray-200 bg-gray-100 z-10 shadow-md'
-                >
-                    <button
-                        onClick={() => { }}
-                        className={`px-3 py-0.5 inline-flex items-center space-x-2 text-left hover:bg-gray-200 cursor-pointer`
-                        }
-                    >
-                        <MdOutlineEdit className='text-gray-700' />
-                        <span>Edit</span>
-                    </button>
-                    <button
-                        onClick={() => { }}
-                        className={`px-3 py-0.5 inline-flex items-center space-x-2 text-left hover:bg-gray-200 cursor-pointer`
-                        }
-                    >
-                        <MdDeleteOutline className='text-red-500' />
-                        <span>Delete</span>
-                    </button>
-                </div>
-            }
-        </div>
-    )
-}

@@ -56,7 +56,6 @@ const TodoItemsContainers = () => {
 
     const scrollSpeed = 10;
     const scrollThreshold = 80;
-    const scrollFrame = useRef<number | null>(null);
 
 
     const loadConfetti = async () => {
