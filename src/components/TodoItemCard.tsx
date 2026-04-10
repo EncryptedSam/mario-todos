@@ -3,6 +3,7 @@ import coinSound from "../assets/sounds/mario_coin_sound.mp3";
 import ButtonGroup, { type Props as ButtonGroupProps } from './shared/ButtonGroup';
 import { MdCheck, MdClose, MdDeleteOutline, MdOutlineEdit, MdOutlineEditOff } from 'react-icons/md';
 import useEscape from '../hooks/useEscape';
+import { BsThreeDotsVertical } from 'react-icons/bs';
 
 interface Props {
     value: string
@@ -53,6 +54,7 @@ const TodoItemCard = forwardRef<HTMLDivElement, Props>(({
     const debounceRef = useRef<number | null>(null);
     const [isEdit, setIsEdit] = useState<boolean>(false);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+
 
     useEscape(() => {
         setIsEdit(false);
@@ -192,30 +194,25 @@ const TodoItemCard = forwardRef<HTMLDivElement, Props>(({
                 if (typeof ref === "function") {
                     ref(el);
                 } else if (ref) {
-                    (ref as React.MutableRefObject<HTMLDivElement | null>).current = el;
+                    (ref as React.RefObject<HTMLDivElement | null>).current = el;
                 }
             }}
+
             className={`
                 relative p-3 group rounded-2xl bg-gray-100 text-sm flex space-x-3! border border-gray-200
-                ${isEdit ? 'border-red-200 bg-red-100' : ''}
+                ${isEdit ? 'border-gray-400' : ''}
                 `
             }
             style={{ opacity: hide ? 0 : 1 }}
-            draggable={true}
             onDragStart={onDragStart}
             onDragOver={onDragOver}
             onDrop={onDrop}
             onDragEnter={onDragEnter}
             onDragLeave={onDragLeave}
             onDragEnd={onDragEnd}
+            draggable={!isEdit}
+
         >
-            <ButtonGroup
-                buttons={buttonGroupButtons}
-                top={-10}
-                right={0}
-                alwaysVisible={isEdit || isDeleteConfirmOpen}
-                selected={isEdit || isDeleteConfirmOpen}
-            />
 
             {isChecked ? (
                 <div
@@ -233,24 +230,100 @@ const TodoItemCard = forwardRef<HTMLDivElement, Props>(({
                 />
             )}
 
-            <textarea
-                ref={textareaRef}
-                className={`flex-1 resize-none overflow-hidden bg-transparent outline-none ${!isEdit && 'cursor-pointer select-none'}`}
-                onChange={(e) => handleTextareaChange(e.target.value)}
-                onKeyDown={handleKeyDown}
-                rows={1}
-                placeholder="Untitled"
-                value={text}
-                readOnly={!isEdit}
-                // onMouseDown={(e) => {
-                //     if (!isEdit) e.preventDefault();
-                // }}
-                onDoubleClick={(e) => {
-                    setIsEdit(true);
-                }}
-            />
+            <div className='relative flex-1' >
+                <textarea
+                    ref={textareaRef}
+                    className={`
+                    w-full resize-none overflow-hidden bg-transparent outline-none 
+                    ${isEdit ? '' : 'cursor-pointer select-text'}
+                    `
+                    }
+                    onChange={(e) => handleTextareaChange(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    rows={1}
+                    placeholder="Untitled"
+                    value={text}
+                    readOnly={!isEdit}
+                />
+                {!isEdit &&
+                    <div
+                        className='absolute top-0 left-0 w-full h-full cursor-pointer'
+                        onDoubleClick={(e) => {
+                            setIsEdit(true);
+                        }}
+                    />
+                }
+            </div>
+
+            <SideDropMenu />
         </div>
     );
 });
 
 export default TodoItemCard;
+
+
+const SideDropMenu = () => {
+    const [showMenu, setShowMenu] = useState<boolean>(false);
+    const containerRef = useRef<HTMLDivElement | null>(null);
+
+    useEscape(() => {
+        setShowMenu(false);
+    });
+
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (
+                containerRef.current &&
+                !containerRef.current.contains(e.target as Node)
+            ) {
+                setShowMenu(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
+
+    return (
+        <div
+            ref={containerRef}
+            className='relative rounded-full cursor-pointer h-5'
+        >
+            <button
+                className='inline-flex text-gray-400 hover:text-gray-600 text-sm items-center justify-center shrink-0 grow-0 w-5 h-5 cursor-pointer'
+                onClick={() => { setShowMenu(!showMenu) }}
+            >
+                <BsThreeDotsVertical />
+            </button>
+
+            {showMenu &&
+
+                <div
+                    className='absolute flex flex-col text-sm py-3 min-w-30 right-[calc(100%+4px)] top-0 rounded-xl border border-gray-200 bg-gray-100 z-10 shadow-md'
+                >
+                    <button
+                        onClick={() => { }}
+                        className={`px-3 py-0.5 inline-flex items-center space-x-2 text-left hover:bg-gray-200 cursor-pointer`
+                        }
+                    >
+                        <MdOutlineEdit className='text-gray-700' />
+                        <span>Edit</span>
+                    </button>
+                    <button
+                        onClick={() => { }}
+                        className={`px-3 py-0.5 inline-flex items-center space-x-2 text-left hover:bg-gray-200 cursor-pointer`
+                        }
+                    >
+                        <MdDeleteOutline className='text-red-500' />
+                        <span>Delete</span>
+                    </button>
+                </div>
+            }
+        </div>
+    )
+}

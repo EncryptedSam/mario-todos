@@ -43,7 +43,7 @@ const TodoItemsContainers = () => {
 
     const [filter, setFilter] = useState<string>('all');
     const [localVolume, setLocalVolume] = useState<number>(0);
-    const [itemId, setItemId] = useState<number | null>(null);
+    const [inputFocusId, setInputFocusId] = useState<number | null>(null);
     const [showConfetti, setShowConfetti] = useState<boolean>(true);
 
     const [group, setGroup] = useState<TodoGroupWithStats>();
@@ -97,60 +97,33 @@ const TodoItemsContainers = () => {
         }
     }
 
-    const scrollToItem = (id: number) => {
-        const container = listRef.current;
-        const el = itemRefs.current.get(id);
 
-        if (!container || !el) return;
-
-        const target =
-            el.offsetTop -
-            container.clientHeight / 2 +
-            el.clientHeight / 2;
-
-        const start = container.scrollTop;
-        const distance = target - start;
-        const duration = 300; // ms
-
-        let startTime: number | null = null;
-
-        const animate = (time: number) => {
-            if (startTime === null) startTime = time;
-
-            const progress = Math.min((time - startTime) / duration, 1);
-
-            // easeInOut
-            const ease = 0.5 * (1 - Math.cos(Math.PI * progress));
-
-            container.scrollTop = start + distance * ease;
-
-            if (progress < 1) {
-                requestAnimationFrame(animate);
-            }
-        };
-
-        requestAnimationFrame(animate);
-    };
-
-    const handleCreateItem = async () => {
+    const handleCreateItem = async (sortOrder?: number) => {
         setFilter('all');
 
-        const res = await createItem(Number(groupId), '');
+        const res = await createItem(Number(groupId), '', sortOrder);
         await loadItems();
         await loadGroup();
 
-        setItemId(res);
+        setInputFocusId(res);
 
         clearTimeout(itemIdTimeoutRef.current);
 
         itemIdTimeoutRef.current = setTimeout(() => {
-            setItemId(null);
-        }, 100)
+            setInputFocusId(null);
+        }, 200)
 
         setTimeout(() => {
-            scrollToItem(res);
-        }, 50);
+            const el = itemRefs.current.get(res);
+            if (!el) return;
+
+            el.scrollIntoView({
+                behavior: "smooth",
+                block: "nearest",
+            });
+        }, 0);
     }
+
 
     const handleUpdateCompleted = async (itemId: number, value: boolean) => {
         await updateItemCompleted(Number(itemId), value);
@@ -199,31 +172,34 @@ const TodoItemsContainers = () => {
         setDragOrder(sortOrder);
 
         const target = e.currentTarget as HTMLElement;
+
+
         const rect = target.getBoundingClientRect();
 
         const clone = target.cloneNode(true) as HTMLElement;
 
-        // lock size
         clone.style.width = `${rect.width}px`;
         clone.style.height = `${rect.height}px`;
 
-        // position offscreen
         clone.style.position = "fixed";
         clone.style.top = "-9999px";
         clone.style.left = "-9999px";
 
-        // preserve styles
         clone.style.borderRadius = "12px";
         clone.style.overflow = "hidden";
         clone.style.boxShadow = "0 8px 20px rgba(0,0,0,0.2)";
         clone.style.boxSizing = "border-box";
+        clone.style.background = "rgba(243, 244, 246, 0.8)";
 
         document.body.appendChild(clone);
 
-        // optional: center cursor
         e.dataTransfer.setDragImage(clone, rect.width / 2, rect.height / 2);
 
-        setTimeout(() => document.body.removeChild(clone), 0);
+        setTimeout(() => {
+            if (document.body.contains(clone)) {
+                document.body.removeChild(clone);
+            }
+        }, 50);
     };
 
     const handleDrop = () => {
@@ -238,6 +214,9 @@ const TodoItemsContainers = () => {
         setHoverIndex(null);
     };
 
+    const handleDragEnd = (e: React.DragEvent) => {
+        (e.currentTarget as HTMLElement).style.opacity = "1";
+    };
 
     const handleDragOver = (e: React.DragEvent, index: number) => {
         e.preventDefault();
@@ -283,6 +262,7 @@ const TodoItemsContainers = () => {
         }
     };
 
+
     return (
         <>
             <NavBar
@@ -317,7 +297,8 @@ const TodoItemsContainers = () => {
                 <hr className='absolute opacity-60 bottom-0 left-0 right-0 m-auto w-[calc(100%-15px)] border-0 border-b-2 border-gray-200' />
             </div>
             <div
-                className='flex-1 pt-2.5 space-y-2.5! min-h-0 scroll-hidden overflow-auto'
+                ref={listRef}
+                className='flex-1 pt-2.5 space-y-2.5! min-h-0 scroll-hidden scroll-smooth overflow-auto'
             >
                 {
                     items
@@ -326,8 +307,8 @@ const TodoItemsContainers = () => {
                             return (
                                 <TodoItemCard
                                     ref={(el) => {
-                                        if (el) itemRefs.current.set(idx, el);
-                                        else itemRefs.current.delete(idx);
+                                        if (el) itemRefs.current.set(Number(id), el);
+                                        else itemRefs.current.delete(Number(id));
                                     }}
                                     key={`todo_item_${id}`}
                                     value={content}
@@ -336,12 +317,13 @@ const TodoItemsContainers = () => {
                                     onChangeText={(value) => { handleUpdateContent(Number(id), value) }}
                                     onDelete={() => { handleDeleteItem(Number(id)) }}
                                     volume={(localVolume / 100) * 1}
-                                    onHitEnter={handleCreateItem}
-                                    focus={id == itemId}
+                                    onHitEnter={() => { handleCreateItem(Number(sortOrder) + 1) }}
+                                    focus={id == inputFocusId}
                                     hide={dragOrder == sortOrder}
                                     onDragOver={(e) => handleDragOver(e, idx)}
                                     onDrop={handleDrop}
                                     onDragStart={(e) => { handleDragStart(e, sortOrder, idx) }}
+                                    onDragEnd={handleDragEnd}
                                 />
                             )
                         })
@@ -349,7 +331,7 @@ const TodoItemsContainers = () => {
             </div>
             <AddNewButton
                 type='task'
-                onClick={handleCreateItem}
+                onClick={() => { handleCreateItem() }}
             />
             {
                 (showConfetti && percentage == 100) &&

@@ -36,7 +36,7 @@ export const createItem = async (
   const newOrder = Math.min(sortOrder, maxOrder + 1);
 
   // case 4: shift + insert
-  await db.transaction("rw", db.todoItems, async () => {
+  const insertedId = await db.transaction("rw", db.todoItems, async () => {
     for (const item of items) {
       if (item.sortOrder >= newOrder) {
         await db.todoItems.update(item.id!, {
@@ -45,15 +45,17 @@ export const createItem = async (
       }
     }
 
-    await db.todoItems.add({
+    // IMPORTANT: return this
+    return db.todoItems.add({
       groupId,
       content,
       completed: false,
       sortOrder: newOrder,
     });
   });
-};
 
+  return insertedId;
+};
 // READ BY GROUP (sorted)
 export const getItemsByGroup = (groupId: number) => {
   return db.todoItems
