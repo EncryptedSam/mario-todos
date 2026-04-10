@@ -11,6 +11,9 @@ interface Props {
     onClickConfetti?(): void;
     confettiValue?: boolean;
     showConfetti?: boolean;
+    
+    onVolumeChange?(): void;
+    volumeValue?: number
 }
 
 const NavBar = ({ volumeSlider, filterDropDown, onClickBack, confettiValue, onClickConfetti, showConfetti }: Props) => {

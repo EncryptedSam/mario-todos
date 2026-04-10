@@ -11,6 +11,7 @@ import { getVolume, setVolume, getConfetti, setConfetti } from '../services/sett
 import { getItemsByGroup, createItem, updateItemCompleted, updateItemContent, deleteItem } from '../services/todoItem.service'
 import Confetti from 'react-confetti'
 import reorderByIndex from '../utils/reorderByIndex'
+import { BsExclamation, BsExclamationCircle } from 'react-icons/bs'
 
 
 function moveRowsManual<T>(array: T[], fromIndex: number, toIndex: number): T[] {
@@ -53,10 +54,8 @@ const TodoItemsContainers = () => {
     const itemIdTimeoutRef = useRef<number | undefined>(undefined);
     const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
-
     const scrollSpeed = 10;
     const scrollThreshold = 80;
-
 
     const loadConfetti = async () => {
         const confetti = await getConfetti();
@@ -95,7 +94,6 @@ const TodoItemsContainers = () => {
             percentage = 0;
         }
     }
-
 
     const handleCreateItem = async (sortOrder?: number) => {
         setFilter('all');
@@ -336,6 +334,7 @@ const TodoItemsContainers = () => {
                 (showConfetti && percentage == 100) &&
                 <Confetti recycle={true} />
             }
+
         </>
     )
 }
