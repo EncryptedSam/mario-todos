@@ -89,14 +89,6 @@ const TodoItemsContainers = () => {
         })();
     }, []);
 
-    let percentage = 0;
-
-    if (group) {
-        percentage = (group.completed / group.total) * 100;
-        if (group.total == 0) {
-            percentage = 0;
-        }
-    }
 
     const handleCreateItem = async (sortOrder?: number) => {
         setFilter('all');
@@ -263,6 +255,16 @@ const TodoItemsContainers = () => {
         }
     };
 
+    let percentage = 0;
+
+    if (group) {
+        percentage = (group.completed / group.total) * 100;
+        if (group.total == 0) {
+            percentage = 0;
+        }
+    }
+
+
 
     return (
         <>
@@ -289,12 +291,15 @@ const TodoItemsContainers = () => {
                 showConfetti={percentage == 100}
             />
             <div className='relative  pt-2 pb-2 min-h-0 scroll-hidden overflow-auto' >
-                <TodoGroupCard
-                    value={group?.title ?? ''}
-                    percentage={percentage}
-                    taskCount={items.length + 2}
-                    readOnly
-                />
+                {group &&
+                    <TodoGroupCard
+                        value={group.title ?? ''}
+                        taskCount={items.length + 2}
+                        completed={group.completed}
+                        total={group.total}
+                        readonly
+                    />
+                }
                 <hr className='absolute opacity-60 bottom-0 left-0 right-0 m-auto w-[calc(100%-15px)] border-0 border-b-2 border-gray-200' />
             </div>
             <div

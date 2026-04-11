@@ -1,22 +1,50 @@
 import React, { useEffect, useRef, useState } from 'react'
-import ButtonGroup from './shared/ButtonGroup';
-import { MdDeleteOutline, MdOutlineEdit, MdOutlineEditOff } from 'react-icons/md';
+import SideDropMenu from './shared/SideDropMenu';
+import { MdDeleteOutline, MdOutlineEdit } from 'react-icons/md';
 
-interface TodoGroupProps {
+interface Props {
     type?: 'progress' | 'step';
-    readOnly?: boolean;
-    percentage?: number;
     onDelete?(): void;
     value: string;
     onChange?(value: string): void;
     onClick?(): void;
     taskCount?: number
     tasksCompleted?: number;
+
+    // 👇 drag events
+    readonly?: boolean;
+    total: number;
+    completed: number;
+    onDragStart?(e: React.DragEvent<HTMLDivElement>): void;
+    onDragOver?(e: React.DragEvent<HTMLDivElement>): void;
+    onDrop?(e: React.DragEvent<HTMLDivElement>): void;
+    onDragEnter?(e: React.DragEvent<HTMLDivElement>): void;
+    onDragLeave?(e: React.DragEvent<HTMLDivElement>): void;
+    onDragEnd?(e: React.DragEvent<HTMLDivElement>): void;
 }
 
 const DEBOUNCE_DELAY = 400;
 
-const TodoGroupCard = ({ percentage, readOnly, value, onChange, onDelete, onClick, taskCount, tasksCompleted = 0 }: TodoGroupProps) => {
+const TodoGroupCard = ({
+    readonly,
+    value,
+    onChange,
+    onDelete,
+    onClick,
+    taskCount,
+    tasksCompleted = 0,
+
+
+    total,
+    completed,
+    onDragStart,
+    onDragOver,
+    onDrop,
+    onDragEnter,
+    onDragLeave,
+    onDragEnd,
+
+}: Props) => {
     const [text, setText] = useState(value);
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -87,50 +115,27 @@ const TodoGroupCard = ({ percentage, readOnly, value, onChange, onDelete, onClic
     }, []);
 
 
-    let buttonGroupButtons = [
-        {
-            icon: <MdOutlineEdit className='text-gray-700' />,
-            onClick: () => { setIsEdit(true) }
-        },
-        {
-            icon: <MdDeleteOutline className='text-red-500' />,
-            onClick: onDelete
-        }
-    ]
+    let percentage: number = ((completed / total) * 100);
 
-    if (isEdit) {
-        buttonGroupButtons = [
-            {
-                icon: <MdOutlineEditOff className='text-gray-700' />,
-                onClick: () => { setIsEdit(false) }
-            },
-            {
-                icon: <MdDeleteOutline className='text-red-500' />,
-                onClick: onDelete
-            }
-        ]
-    }
+    percentage = isNaN(percentage) ? 0 : percentage;
 
-    const dots = Array.from({ length: taskCount ?? 0 }, (_, i) => i);
+    const dots = Array.from({ length: total ?? 0 }, (_, i) => i);
 
     return (
         <div
             ref={containerRef}
             className={`
                 relative p-3 group rounded-2xl bg-gray-100 text-sm flex flex-col space-x-3! space-y-2! border border-gray-200 
-                ${!isEdit && !readOnly && 'cursor-pointer'}
+                ${!isEdit && !readonly && 'cursor-pointer'}
             `}
             onClick={handleClick}
+            onDragStart={onDragStart}
+            onDragOver={onDragOver}
+            onDrop={onDrop}
+            onDragEnter={onDragEnter}
+            onDragLeave={onDragLeave}
+            onDragEnd={onDragEnd}
         >
-
-            {!readOnly && (
-                <ButtonGroup
-                    buttons={buttonGroupButtons}
-                    top={-10}
-                    right={0}
-                    alwaysVisible={isEdit}
-                />
-            )}
 
             <div className='flex w-full text-sm font-medium'>
                 <textarea
@@ -142,43 +147,63 @@ const TodoGroupCard = ({ percentage, readOnly, value, onChange, onDelete, onClic
                     placeholder="Untitled"
                     disabled={!isEdit}
                 />
-                <span className='inline-flex shrink-0 items-end w-10 justify-end'>
-                    {percentage?.toFixed(0) ?? 0}%
-                </span>
+                {!readonly &&
+                    <SideDropMenu
+                        options={[
+                            {
+                                icon: <MdOutlineEdit className='text-gray-700' />,
+                                label: 'Edit',
+                                onClick: () => { setIsEdit(true) }
+                            },
+                            {
+                                icon: <MdDeleteOutline className='text-red-500' />,
+                                label: 'Delete',
+                                onClick: () => { onDelete?.() }
+                            }
+                        ]}
+                    />
+                }
+                {readonly &&
+                    <span className='inline-flex shrink-0 items-end w-10 justify-end'>
+                        {percentage.toFixed(0)}%
+                    </span>
+                }
             </div>
 
             <div className="relative w-full h-2 rounded-full overflow-hidden">
-                {/* <div
-                    className="h-full bg-red-500 transition-all duration-300 rounded-full"
-                    style={{ width: `${percentage ?? 30}%` }}
-                /> */}
-                <div className='absolute space-x-1 top-0 left-0 flex w-full h-full items-center justify-between' >
-                    {
-                        dots.map((_, idx) => {
-                            return (
-                                <span
-                                    key={`${idx}`}
-                                    className={`
+                {!readonly &&
+                    <div className='w-full h-full bg-gray-300' >
+                        <div
+                            className="absolute h-full bg-red-500 transition-all duration-300 rounded-full"
+                            style={{ width: `${percentage ?? 30}%` }}
+                        />
+                    </div>
+                }
+                {readonly &&
+                    <div className='absolute space-x-1 top-0 left-0 flex w-full h-full items-center justify-between' >
+                        {
+                            dots.map((_, idx) => {
+                                return (
+                                    <span
+                                        key={`${idx}`}
+                                        className={`
                                         flex-1 w-2 h-full rounded-full
-                                        ${idx < tasksCompleted ? 'bg-red-500' : 'bg-gray-300 '}
+                                        ${idx < completed ? 'bg-red-500' : 'bg-gray-300 '}
                                         `
-                                    }
-                                />
-                            )
-                        })
-                    }
-                    {/* {
-                        dots.map((_, idx) => {
-                            return (
-                                <span
-                                    key={`${idx}`}
-                                    className='w-1.5 h-1.5 bg-yellow-400 rounded-full first-of-type:opacity-0 last-of-type:opacity-0'
-                                />
-                            )
-                        })
-                    } */}
-                </div>
+                                        }
+                                    />
+                                )
+                            })
+                        }
+                    </div>
+                }
             </div>
+            {!readonly &&
+                <div className='text-[13px] flex justify-between text-gray-700' >
+                    <div>{completed}/{total} tasks completed</div>
+                    <span>{percentage.toFixed(0)}%</span>
+                </div>
+            }
         </div>
     );
 };

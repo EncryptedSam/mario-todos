@@ -42,6 +42,10 @@ const SideDropMenu = ({ options }: Props) => {
         <div
             ref={containerRef}
             className='relative rounded-full cursor-pointer h-5'
+            onClick={(e) => { 
+                e.preventDefault()
+                e.stopPropagation();
+            }}
         >
             <button
                 className={`
@@ -57,14 +61,14 @@ const SideDropMenu = ({ options }: Props) => {
             {showMenu &&
 
                 <div
-                    className='absolute flex flex-col text-sm py-3 min-w-30 right-[calc(100%+4px)] top-0 rounded-xl border border-gray-200 bg-gray-100 z-10 shadow-md'
+                    className='absolute flex flex-col text-sm py-2 min-w-30 right-[calc(100%+4px)] top-0 rounded-xl border border-gray-200 bg-gray-100 z-10 shadow-md'
                 >
                     {
                         options?.map(({ label, icon, onClick }, idx) => {
                             return (
                                 <button
                                     key={`${label}_${idx}`}
-                                    className={`px-3 py-0.5 inline-flex items-center space-x-2 text-left hover:bg-gray-200 cursor-pointer`}
+                                    className={`text-[14px] font-normal text-gray-800 px-3 py-0.5 inline-flex items-center space-x-2 text-left hover:bg-gray-200 cursor-pointer`}
                                     onClick={() => { onClick?.(); setShowMenu(false) }}
                                 >
                                     {icon}

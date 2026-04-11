@@ -83,10 +83,9 @@ const TodoGroupsContainers = () => {
                                 onChange={(value) => { handleCardChange(Number(id), value) }}
                                 value={title}
                                 onDelete={() => { handleDelete(Number(id)) }}
-                                percentage={percentage}
                                 onClick={() => { navigate(`/group/${id}/`); }}
-                                tasksCompleted={completed}
-                                taskCount={total}
+                                completed={completed}
+                                total={total}
                             />
                         )
                     })

@@ -8,8 +8,10 @@ export interface Props {
 };
 
 const VolumeSlider = ({ className, onChange, value }: Props) => {
+    const [volume, setVolume] = useState(value);
     const [sliderWidth, setSliderWidth] = useState<number>(0);
     const sliderRef = useRef<HTMLDivElement | null>(null);
+    const timeoutRef = useRef<number | undefined>(undefined);
 
     useEffect(() => {
         if (sliderRef.current) {
@@ -17,15 +19,28 @@ const VolumeSlider = ({ className, onChange, value }: Props) => {
         }
     }, []);
 
+    const handleChange = (value: number) => {
+        setVolume(value);
+        clearTimeout(timeoutRef.current);
+
+        timeoutRef.current = setTimeout(() => {
+            onChange?.(value)
+        }, 100);
+    }
+
+    useEffect(() => {
+        setVolume(value);
+    }, [value])
+
 
     let left = 0;
-    if (typeof value == 'number') {
-        left = (value / 100) * (100 - ((15 / sliderWidth) * 100));
+    if (typeof volume == 'number') {
+        left = (volume / 100) * (100 - ((15 / sliderWidth) * 100));
     }
 
     return (
         <div className={`flex h-7.5 px-2 items-center gap-2 bg-gray-100 rounded-full border border-gray-200 ${className}`}>
-            {value == 0 ?
+            {volume == 0 ?
                 <RiVolumeMuteLine className="text-gray-600 shrink-0" size={18} />
                 :
                 <RiVolumeDownLine className="text-gray-600 shrink-0 -ml-0.5" size={18} />
@@ -40,7 +55,7 @@ const VolumeSlider = ({ className, onChange, value }: Props) => {
                         <div
                             className='bg-red-500 h-full'
                             style={{
-                                width: `${value}%`
+                                width: `${volume}%`
                             }}
                         />
                     </div>
@@ -52,9 +67,9 @@ const VolumeSlider = ({ className, onChange, value }: Props) => {
                         type="range"
                         min={0}
                         max={100}
-                        value={value}
-                        onChange={(e) => onChange && onChange(Number(e.target.value))}
                         className={`relative w-full appearance-none bg-transparent cursor-pointer opacity-0 z-10`}
+                        onChange={(e) => handleChange(Number(e.target.value))}
+                        value={volume}
                     />
                 </div>
             </div>
