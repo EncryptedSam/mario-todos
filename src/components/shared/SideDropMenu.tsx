@@ -59,7 +59,6 @@ const SideDropMenu = ({ options }: Props) => {
             </button>
 
             {showMenu &&
-
                 <div
                     className='absolute flex flex-col text-sm py-2 min-w-30 right-[calc(100%+4px)] top-0 rounded-xl border border-gray-200 bg-gray-100 z-10 shadow-md'
                 >
@@ -68,10 +67,10 @@ const SideDropMenu = ({ options }: Props) => {
                             return (
                                 <button
                                     key={`${label}_${idx}`}
-                                    className={`text-[14px] font-normal text-gray-800 px-3 py-0.5 inline-flex items-center space-x-2 text-left hover:bg-gray-200 cursor-pointer`}
+                                    className={`text-[14px] font-normal text-gray-800 px-3 inline-flex items-center space-x-2 text-left hover:bg-gray-200 cursor-pointer py-1`}
                                     onClick={() => { onClick?.(); setShowMenu(false) }}
                                 >
-                                    {icon}
+                                    <span className='text-sm'>{icon}</span>
                                     <span>{label}</span>
                                 </button>
                             )

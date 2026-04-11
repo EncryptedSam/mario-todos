@@ -8,8 +8,6 @@ interface Props {
     value: string;
     onChange?(value: string): void;
     onClick?(): void;
-    taskCount?: number
-    tasksCompleted?: number;
 
     // 👇 drag events
     readonly?: boolean;
@@ -31,9 +29,6 @@ const TodoGroupCard = ({
     onChange,
     onDelete,
     onClick,
-    taskCount,
-    tasksCompleted = 0,
-
 
     total,
     completed,
@@ -47,7 +42,7 @@ const TodoGroupCard = ({
 }: Props) => {
     const [text, setText] = useState(value);
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const timeoutRef = useRef<number | undefined>(undefined);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [isEdit, setIsEdit] = useState<boolean>(false);
 
@@ -69,11 +64,9 @@ const TodoGroupCard = ({
         setText(val);
         autoResize();
 
-        if (debounceRef.current) {
-            clearTimeout(debounceRef.current);
-        }
+        clearTimeout(timeoutRef.current);
 
-        debounceRef.current = setTimeout(() => {
+        timeoutRef.current = setTimeout(() => {
             onChange?.(val);
         }, DEBOUNCE_DELAY);
     };
