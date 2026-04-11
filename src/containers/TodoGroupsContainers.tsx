@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import NavBar from '../components/NavBar'
 import TodoGroupCard from '../components/TodoGroupCard'
 import AddNewButton from '../components/AddNewButton'
@@ -71,11 +71,6 @@ const TodoGroupsContainers = () => {
             <div className='flex-1 pt-2.5 space-y-2.5! min-h-0 scroll-hidden overflow-auto' >
                 {
                     groups.map(({ id, title, completed, total }) => {
-
-                        let percentage = (completed / total) * 100;
-                        if (total == 0) {
-                            percentage = 0;
-                        }
 
                         return (
                             <TodoGroupCard

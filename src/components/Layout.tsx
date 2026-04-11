@@ -23,15 +23,17 @@ const Layout = ({ children }: Props) => {
             }}
         >
             <div className='relative pt-20! max-h-215 h-screen w-110 flex flex-col'>
-                <div className='absolute w-full flex justify-center luckiest-guy-regular items-center top-0 z-10 text-gray-100 font-bold space-x-3! text-4xl pointer-events-none'>
-                    <span className='self-start mt-10'>Lets</span>
+                <div
+                    className='absolute w-full flex justify-center items-center top-0 z-10 text-gray-100 font-bold space-x-3! text-4xl pointer-events-none'
+                >
+                    <span className='self-start mt-10 luckiest-guy-regular'>Lets</span>
                     <div
                         className='w-30 h-30 border-5 border-red-600 rounded-full bg-white bg-no-repeat bg-cover bg-center'
                         style={{
                             backgroundImage: "url('/mario.png')",
                         }}
                     />
-                    <span className='self-start mt-10'>Doo</span>
+                    <span className='self-start mt-10 luckiest-guy-regular'>Doo</span>
                 </div>
                 <div
                     className='relative flex flex-col flex-1 border-5 border-red-600 rounded-4xl bg-repeat overflow-hidden'
