@@ -10,9 +10,10 @@ type Option = {
 
 interface Props {
     options?: Option[]
+    alignBottm?: boolean
 }
 
-const SideDropMenu = ({ options }: Props) => {
+const SideDropMenu = ({ options, alignBottm }: Props) => {
     const [showMenu, setShowMenu] = useState<boolean>(false);
     const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -42,7 +43,7 @@ const SideDropMenu = ({ options }: Props) => {
         <div
             ref={containerRef}
             className='relative rounded-full cursor-pointer h-5'
-            onClick={(e) => { 
+            onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation();
             }}
@@ -60,7 +61,10 @@ const SideDropMenu = ({ options }: Props) => {
 
             {showMenu &&
                 <div
-                    className='absolute flex flex-col text-sm py-2 min-w-30 right-[calc(100%+4px)] top-0 rounded-xl border border-gray-200 bg-gray-100 z-10 shadow-md'
+                    className={`
+                        absolute flex flex-col text-sm py-2 min-w-30 right-[calc(100%+4px)] rounded-xl border border-gray-200 bg-gray-100 z-10 shadow-md ${alignBottm ? 'bottom-0' : 'top-0'}
+                        `
+                    }
                 >
                     {
                         options?.map(({ label, icon, onClick }, idx) => {

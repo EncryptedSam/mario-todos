@@ -9,10 +9,11 @@ interface Props {
     onChange?(value: string): void;
     onClick?(): void;
 
-    // 👇 drag events
     readonly?: boolean;
     total: number;
     completed: number;
+    alignBottm?: boolean;
+    // drag events
     onDragStart?(e: React.DragEvent<HTMLDivElement>): void;
     onDragOver?(e: React.DragEvent<HTMLDivElement>): void;
     onDrop?(e: React.DragEvent<HTMLDivElement>): void;
@@ -29,7 +30,7 @@ const TodoGroupCard = ({
     onChange,
     onDelete,
     onClick,
-
+    alignBottm,
     total,
     completed,
     onDragStart,
@@ -142,6 +143,7 @@ const TodoGroupCard = ({
                 />
                 {!readonly &&
                     <SideDropMenu
+                        alignBottm={alignBottm}
                         options={[
                             {
                                 icon: <MdOutlineEdit className='text-gray-700' />,

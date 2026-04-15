@@ -1,4 +1,4 @@
-type BaseType = { id: number; sortOrder: number };
+type BaseType = { id?: number; sortOrder: number };
 
 function reorderByIndex<T extends BaseType>(
   array: T[],

@@ -70,7 +70,7 @@ const TodoGroupsContainers = () => {
             />
             <div className='flex-1 pt-2.5 space-y-2.5! min-h-0 scroll-hidden overflow-auto' >
                 {
-                    groups.map(({ id, title, completed, total }) => {
+                    groups.map(({ id, title, completed, total }, idx) => {
 
                         return (
                             <TodoGroupCard

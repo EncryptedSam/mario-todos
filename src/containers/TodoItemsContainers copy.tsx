@@ -8,9 +8,10 @@ import { getGroupByIdWithStats } from '../services/todoGroup.service'
 import { useParams } from "react-router-dom";
 import type { TodoGroupWithStats, TodoItem } from '../db/schema'
 import { getVolume, setVolume, getConfetti, setConfetti } from '../services/settings.service'
-import { getItemsByGroup, createItem, bulkUpdateItemOrder, updateItemCompleted, updateItemContent, deleteItem } from '../services/todoItem.service'
+import { getItemsByGroup, createItem, updateItemCompleted, updateItemContent, deleteItem } from '../services/todoItem.service'
 import Confetti from 'react-confetti'
 import reorderByIndex from '../utils/reorderByIndex'
+import { BsExclamation, BsExclamationCircle } from 'react-icons/bs'
 import DeleteAlertModal from '../components/DeleteAlertModal'
 
 
@@ -39,6 +40,8 @@ const TodoItemsContainers = () => {
     const [dragIndex, setDragIndex] = useState<number | null>(null);
     const [dragOrder, setDragOrder] = useState<number | null>(null);
 
+    const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+    const [hoverOrder, setHoverOrder] = useState<number | null>(null);
 
     const [deleteId, setDeleteId] = useState<number | null>(null);
 
@@ -53,7 +56,6 @@ const TodoItemsContainers = () => {
     const listRef = useRef<HTMLDivElement | null>(null);
     const itemIdTimeoutRef = useRef<number | undefined>(undefined);
     const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
-    const itemsSnapRef = useRef<TodoItem[] | null>(null);
 
     const scrollSpeed = 10;
     const scrollThreshold = 80;
@@ -161,7 +163,6 @@ const TodoItemsContainers = () => {
     const handleDragStart = (e: React.DragEvent, sortOrder: number, dragIndex: number) => {
         setDragIndex(dragIndex);
         setDragOrder(sortOrder);
-        itemsSnapRef.current = [...items];
 
         const target = e.currentTarget as HTMLElement;
 
@@ -194,20 +195,16 @@ const TodoItemsContainers = () => {
         }, 50);
     };
 
-    const handleDrop = async () => {
-
-        if (itemsSnapRef.current != null && dragIndex != null) {
-            const toOrder = itemsSnapRef.current[dragIndex].sortOrder;
-            const fromOrder = items[dragIndex].sortOrder;
-            const updates = reorderByIndex<TodoItem>(items, fromOrder, toOrder);
-
-            await bulkUpdateItemOrder(updates);
-            await loadItems();
-            itemsSnapRef.current = null;
+    const handleDrop = () => {
+        if (dragIndex !== null && hoverIndex !== null) {
+            const newItems = moveRowsManual(items, dragIndex, hoverIndex);
+            setItems(newItems);
         }
 
         setDragIndex(null);
         setDragOrder(null);
+        setHoverOrder(null);
+        setHoverIndex(null);
     };
 
     const handleDragEnd = (e: React.DragEvent) => {

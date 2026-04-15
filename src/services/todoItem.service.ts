@@ -85,7 +85,7 @@ export const updateItemOrder = (id: number, sortOrder: number) => {
 };
 
 export const bulkUpdateItemOrder = async (
-  items: { id: number; sortOrder: number }[],
+  items: { id?: number; sortOrder: number }[],
 ) => {
   await db.transaction("rw", db.todoItems, async () => {
     for (const item of items) {
