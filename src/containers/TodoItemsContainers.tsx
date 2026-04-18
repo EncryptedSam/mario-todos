@@ -12,6 +12,7 @@ import { getItemsByGroup, createItem, bulkUpdateItemOrder, updateItemCompleted, 
 import Confetti from 'react-confetti'
 import reorderByIndex from '../utils/reorderByIndex'
 import DeleteAlertModal from '../components/DeleteAlertModal'
+import TodoItems, { type Props as TodoItemsProps } from '../components/TodoItems'
 
 
 function moveRowsManual<T>(array: T[], fromIndex: number, toIndex: number): T[] {
@@ -36,9 +37,6 @@ const TodoItemsContainers = () => {
     const navigate = useNavigate();
     const { id: groupId } = useParams();
 
-    const [dragIndex, setDragIndex] = useState<number | null>(null);
-    const [dragOrder, setDragOrder] = useState<number | null>(null);
-
 
     const [deleteId, setDeleteId] = useState<number | null>(null);
 
@@ -50,13 +48,10 @@ const TodoItemsContainers = () => {
     const [group, setGroup] = useState<TodoGroupWithStats>();
     const [items, setItems] = useState<TodoItem[]>([]);
 
-    const listRef = useRef<HTMLDivElement | null>(null);
+
     const itemIdTimeoutRef = useRef<number | undefined>(undefined);
     const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
-    const itemsSnapRef = useRef<TodoItem[] | null>(null);
 
-    const scrollSpeed = 10;
-    const scrollThreshold = 80;
 
     const loadConfetti = async () => {
         const confetti = await getConfetti();
@@ -87,7 +82,6 @@ const TodoItemsContainers = () => {
         })();
     }, []);
 
-
     const handleCreateItem = async (sortOrder?: number) => {
         setFilter('all');
 
@@ -114,17 +108,19 @@ const TodoItemsContainers = () => {
         }, 0);
     }
 
-
     const handleUpdateCompleted = async (itemId: number, value: boolean) => {
-        await updateItemCompleted(Number(itemId), value);
-        await loadItems();
-        await loadGroup();
+        console.log(value);
+
+        // await updateItemCompleted(Number(itemId), value);
+        // await loadItems();
+        // await loadGroup();
     }
 
     const handleUpdateContent = async (itemId: number, value: string) => {
         await updateItemContent(Number(itemId), value);
         await loadItems();
     }
+
 
     const handleDeleteItem = async () => {
         await deleteItem(Number(deleteId));
@@ -143,121 +139,6 @@ const TodoItemsContainers = () => {
         setConfetti(!showConfetti);
     }
 
-    const getFilter = (completed: boolean) => {
-
-        if (filter == 'pending') {
-            return !completed
-        }
-        if (filter == 'completed') {
-            return completed
-        }
-
-        if (filter == 'all') {
-            return true
-        }
-    }
-
-
-    const handleDragStart = (e: React.DragEvent, sortOrder: number, dragIndex: number) => {
-        setDragIndex(dragIndex);
-        setDragOrder(sortOrder);
-        itemsSnapRef.current = [...items];
-
-        const target = e.currentTarget as HTMLElement;
-
-
-        const rect = target.getBoundingClientRect();
-
-        const clone = target.cloneNode(true) as HTMLElement;
-
-        clone.style.width = `${rect.width}px`;
-        clone.style.height = `${rect.height}px`;
-
-        clone.style.position = "fixed";
-        clone.style.top = "-9999px";
-        clone.style.left = "-9999px";
-
-        clone.style.borderRadius = "12px";
-        clone.style.overflow = "hidden";
-        clone.style.boxShadow = "0 8px 20px rgba(0,0,0,0.2)";
-        clone.style.boxSizing = "border-box";
-        clone.style.background = "rgba(243, 244, 246, 0.8)";
-
-        document.body.appendChild(clone);
-
-        e.dataTransfer.setDragImage(clone, rect.width / 2, rect.height / 2);
-
-        setTimeout(() => {
-            if (document.body.contains(clone)) {
-                document.body.removeChild(clone);
-            }
-        }, 50);
-    };
-
-    const handleDrop = async () => {
-
-        if (itemsSnapRef.current != null && dragIndex != null) {
-            const toOrder = itemsSnapRef.current[dragIndex].sortOrder;
-            const fromOrder = items[dragIndex].sortOrder;
-            const updates = reorderByIndex<TodoItem>(items, fromOrder, toOrder);
-
-            await bulkUpdateItemOrder(updates);
-            await loadItems();
-            itemsSnapRef.current = null;
-        }
-
-        setDragIndex(null);
-        setDragOrder(null);
-    };
-
-    const handleDragEnd = (e: React.DragEvent) => {
-        (e.currentTarget as HTMLElement).style.opacity = "1";
-    };
-
-    const handleDragOver = (e: React.DragEvent, index: number) => {
-        e.preventDefault();
-
-        handleAutoScroll(e);
-
-        if (dragIndex === null) return;
-
-        const target = e.currentTarget as HTMLElement;
-        const rect = target.getBoundingClientRect();
-        const middleY = rect.top + rect.height / 2;
-
-        if (index === dragIndex) return;
-
-        if (
-            (index > dragIndex && e.clientY < middleY) ||
-            (index < dragIndex && e.clientY > middleY)
-        ) {
-            return;
-        }
-
-        const newItems = moveRowsManual(items, dragIndex, index);
-        setItems(newItems);
-        setDragIndex(index);
-    };
-
-    const handleAutoScroll = (e: React.DragEvent) => {
-        if (!listRef.current) return;
-
-        const container = listRef.current;
-        const rect = container.getBoundingClientRect();
-
-        const offsetY = e.clientY - rect.top;
-
-        // near top
-        if (offsetY < scrollThreshold) {
-            container.scrollTop -= scrollSpeed;
-        }
-
-        // near bottom
-        if (offsetY > rect.height - scrollThreshold) {
-            container.scrollTop += scrollSpeed;
-        }
-    };
-
     let percentage = 0;
 
     if (group) {
@@ -267,7 +148,20 @@ const TodoItemsContainers = () => {
         }
     }
 
-
+    const mappedItems: TodoItemsProps['data'] = items.map(({ completed, content, sortOrder, id }) => {
+        return {
+            id: Number(id),
+            sortOrder,
+            value: content,
+            checked: completed,
+            onDelete: () => { setDeleteId(Number(id)) },
+            focus: inputFocusId == id,
+            volume: (localVolume / 100) * 1,
+            onChangeText: (value) => { handleUpdateContent(Number(id), value) },
+            onClickCheck: (value) => { handleUpdateCompleted(Number(id), value) },
+            onHitEnter: () => { handleCreateItem(Number(sortOrder) + 1) },
+        }
+    });
 
     return (
         <>
@@ -304,41 +198,9 @@ const TodoItemsContainers = () => {
                 }
                 <hr className='absolute opacity-60 bottom-0 left-0 right-0 m-auto w-[calc(100%-15px)] border-0 border-b-2 border-gray-200' />
             </div>
-            <div
-                ref={listRef}
-                className='flex-1 pt-2.5 space-y-2.5! min-h-0 scroll-hidden scroll-smooth overflow-auto'
-            >
-                {
-                    items
-                        .filter(item => getFilter(item.completed))
-                        .map(({ completed, content, id, sortOrder }, idx) => {
-                            return (
-                                <TodoItemCard
-                                    ref={(el) => {
-                                        if (el) itemRefs.current.set(Number(id), el);
-                                        else itemRefs.current.delete(Number(id));
-                                    }}
-                                    key={`todo_item_${id}`}
-                                    onDelete={() => { setDeleteId(Number(id)) }}
-
-                                    value={content}
-                                    checked={completed}
-                                    onClickCheck={(value) => { handleUpdateCompleted(Number(id), value) }}
-                                    onChangeText={(value) => { handleUpdateContent(Number(id), value) }}
-                                    volume={(localVolume / 100) * 1}
-
-                                    onHitEnter={() => { handleCreateItem(Number(sortOrder) + 1) }}
-                                    focus={id == inputFocusId}
-                                    hide={dragOrder == sortOrder}
-                                    onDragOver={(e) => handleDragOver(e, idx)}
-                                    onDrop={handleDrop}
-                                    onDragStart={(e) => { handleDragStart(e, sortOrder, idx) }}
-                                    onDragEnd={handleDragEnd}
-                                />
-                            )
-                        })
-                }
-            </div>
+            <TodoItems
+                data={mappedItems}
+            />
             <AddNewButton
                 type='task'
                 onClick={() => { handleCreateItem() }}

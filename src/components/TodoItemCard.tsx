@@ -4,7 +4,7 @@ import { MdDeleteOutline, MdOutlineEdit } from 'react-icons/md';
 import useEscape from '../hooks/useEscape';
 import SideDropMenu from './shared/SideDropMenu';
 
-interface Props {
+export interface Props {
     value: string
     onChangeText?(value: string): void;
 
@@ -52,12 +52,10 @@ const TodoItemCard = forwardRef<HTMLDivElement, Props>(({
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
     const debounceRef = useRef<number | null>(null);
     const [isEdit, setIsEdit] = useState<boolean>(false);
-    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
 
     useEscape(() => {
         setIsEdit(false);
-        setIsDeleteConfirmOpen(false);
     });
 
     const autoResize = () => {
@@ -101,7 +99,6 @@ const TodoItemCard = forwardRef<HTMLDivElement, Props>(({
                 !containerRef.current.contains(e.target as Node)
             ) {
                 setIsEdit(false);
-                setIsDeleteConfirmOpen(false);
             }
         };
 
