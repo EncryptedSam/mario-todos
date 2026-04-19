@@ -37,7 +37,6 @@ const TodoItemsContainers = () => {
     const navigate = useNavigate();
     const { id: groupId } = useParams();
 
-
     const [deleteId, setDeleteId] = useState<number | null>(null);
 
     const [filter, setFilter] = useState<string>('all');
@@ -47,7 +46,6 @@ const TodoItemsContainers = () => {
 
     const [group, setGroup] = useState<TodoGroupWithStats>();
     const [items, setItems] = useState<TodoItem[]>([]);
-
 
     const itemIdTimeoutRef = useRef<number | undefined>(undefined);
     const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
@@ -109,11 +107,10 @@ const TodoItemsContainers = () => {
     }
 
     const handleUpdateCompleted = async (itemId: number, value: boolean) => {
-        console.log(value);
 
-        // await updateItemCompleted(Number(itemId), value);
-        // await loadItems();
-        // await loadGroup();
+        await updateItemCompleted(Number(itemId), value);
+        await loadItems();
+        await loadGroup();
     }
 
     const handleUpdateContent = async (itemId: number, value: string) => {
@@ -149,17 +146,13 @@ const TodoItemsContainers = () => {
     }
 
     const mappedItems: TodoItemsProps['data'] = items.map(({ completed, content, sortOrder, id }) => {
+        
         return {
             id: Number(id),
             sortOrder,
             value: content,
             checked: completed,
-            onDelete: () => { setDeleteId(Number(id)) },
-            focus: inputFocusId == id,
-            volume: (localVolume / 100) * 1,
-            onChangeText: (value) => { handleUpdateContent(Number(id), value) },
-            onClickCheck: (value) => { handleUpdateCompleted(Number(id), value) },
-            onHitEnter: () => { handleCreateItem(Number(sortOrder) + 1) },
+            focus: inputFocusId == id
         }
     });
 
@@ -200,6 +193,11 @@ const TodoItemsContainers = () => {
             </div>
             <TodoItems
                 data={mappedItems}
+                volume={(localVolume / 100) * 1}
+                onDelete={(id) => { setDeleteId(Number(id)) }}
+                onChangeText={(id, value) => { handleUpdateContent(id, value) }}
+                onClickCheck={(id, value) => { handleUpdateCompleted(id, value) }}
+                onHitEnter={(sortOrder) => { handleCreateItem(sortOrder) }}
             />
             <AddNewButton
                 type='task'
