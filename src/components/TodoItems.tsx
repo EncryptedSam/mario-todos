@@ -2,10 +2,13 @@ import React, { useRef } from 'react'
 import TodoItemCard, { type Props as TodoItemCardProps } from './TodoItemCard'
 
 export interface Props {
-    data?: ({ sortOrder: number, id: number } & Omit<TodoItemCardProps, 'onDragStart' | 'onDragOver' | 'onDrop' | 'onDragEnter' | 'onDragLeave' | 'onDragEnd' | 'hide' | 'volume' | 'onDelete' | 'onChangeText' | 'onClickCheck'>)[]
+    data?: ({ sortOrder: number, id: number } & Omit<TodoItemCardProps, 'onDragStart' | 'onDragOver' | 'onDrop' | 'onDragEnter' | 'onDragLeave' | 'onDragEnd' | 'hide' | 'volume' | 'onDelete' | 'onChangeText' | 'onClickCheck' | 'focus'>)[]
 
-    onReorder?(args: { id: number, sortOrder: number }[]): void;
+
+    focusId: number | null;
+
     volume: number;
+    onReorder?(args: { id: number, sortOrder: number }[]): void;
 
     onDelete: (itemId: number) => void,
     onChangeText: (itemId: number, value: string) => void,
@@ -15,7 +18,7 @@ export interface Props {
 }
 
 
-const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEnter, }: Props) => {
+const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEnter, focusId }: Props) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
 
 
@@ -34,23 +37,24 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
             className='flex-1 pt-2.5 space-y-2.5! min-h-0 scroll-hidden scroll-smooth overflow-auto'
         >
             {
-                data?.map(({ id, sortOrder, value, checked, focus }) => {
+                data?.map(({ id, sortOrder, value, checked }) => {
 
                     return (
                         <TodoItemCard
                             key={`${id}_${sortOrder}`}
                             value={value}
                             checked={checked}
-                            focus={focus}
+                            focus={focusId == id}
                             volume={volume}
 
                             onChangeText={(value) => { onChangeText(id, value) }}
                             onClickCheck={(value) => { onClickCheck(id, value) }}
                             onDelete={() => { onDelete(id) }}
                             onHitEnter={() => { onHitEnter(sortOrder + 1) }}
-                        // hide
+
                         // onDragStart={handleDragStart}
                         // onDragOver={handleDragOver}
+                        // hide
                         // onDrop
                         // onDragEnter
                         // onDragLeave

@@ -146,13 +146,12 @@ const TodoItemsContainers = () => {
     }
 
     const mappedItems: TodoItemsProps['data'] = items.map(({ completed, content, sortOrder, id }) => {
-        
+
         return {
             id: Number(id),
             sortOrder,
             value: content,
-            checked: completed,
-            focus: inputFocusId == id
+            checked: completed
         }
     });
 
@@ -193,6 +192,7 @@ const TodoItemsContainers = () => {
             </div>
             <TodoItems
                 data={mappedItems}
+                focusId={inputFocusId}
                 volume={(localVolume / 100) * 1}
                 onDelete={(id) => { setDeleteId(Number(id)) }}
                 onChangeText={(id, value) => { handleUpdateContent(id, value) }}
