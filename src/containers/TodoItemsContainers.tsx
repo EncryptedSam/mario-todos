@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import NavBar from '../components/NavBar'
 import TodoGroupCard from '../components/TodoGroupCard'
-import TodoItemCard from '../components/TodoItemCard'
 import AddNewButton from '../components/AddNewButton'
 import { useNavigate } from 'react-router-dom'
 import { getGroupByIdWithStats } from '../services/todoGroup.service'
@@ -10,28 +9,9 @@ import type { TodoGroupWithStats, TodoItem } from '../db/schema'
 import { getVolume, setVolume, getConfetti, setConfetti } from '../services/settings.service'
 import { getItemsByGroup, createItem, bulkUpdateItemOrder, updateItemCompleted, updateItemContent, deleteItem } from '../services/todoItem.service'
 import Confetti from 'react-confetti'
-import reorderByIndex from '../utils/reorderByIndex'
 import DeleteAlertModal from '../components/DeleteAlertModal'
 import TodoItems, { type Props as TodoItemsProps } from '../components/TodoItems'
 
-
-function moveRowsManual<T>(array: T[], fromIndex: number, toIndex: number): T[] {
-    const result = structuredClone(array);
-    const item = result[fromIndex];
-
-    if (fromIndex > toIndex) {
-        for (let i = fromIndex; i > toIndex; i--) {
-            result[i] = result[i - 1];
-        }
-    } else {
-        for (let i = fromIndex; i < toIndex; i++) {
-            result[i] = result[i + 1];
-        }
-    }
-
-    result[toIndex] = item;
-    return result;
-}
 
 const TodoItemsContainers = () => {
     const navigate = useNavigate();
@@ -118,6 +98,10 @@ const TodoItemsContainers = () => {
         await loadItems();
     }
 
+    const handleBulkReorder = async (items: { id: number; sortOrder: number }[]) => {
+        await bulkUpdateItemOrder(items);
+        await loadItems();
+    }
 
     const handleDeleteItem = async () => {
         await deleteItem(Number(deleteId));
@@ -201,6 +185,7 @@ const TodoItemsContainers = () => {
                 onChangeText={(id, value) => { handleUpdateContent(id, value) }}
                 onClickCheck={(id, value) => { handleUpdateCompleted(id, value) }}
                 onHitEnter={(sortOrder) => { handleCreateItem(sortOrder) }}
+                onReorder={handleBulkReorder}
             />
             <AddNewButton
                 type='task'

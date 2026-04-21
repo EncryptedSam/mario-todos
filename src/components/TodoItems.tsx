@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
-import TodoItemCard, { type Props as TodoItemCardProps } from './TodoItemCard'
-
+import TodoItemCard from './TodoItemCard'
+import reorderByIndex from '../utils/reorderByIndex';
 
 function move<T>(arr: T[], selectedIndex: number, movedToIndex: number): T[] {
     const result = [...arr];
@@ -10,7 +10,6 @@ function move<T>(arr: T[], selectedIndex: number, movedToIndex: number): T[] {
 
     return result;
 }
-
 
 function createClone(e: React.DragEvent): HTMLElement {
     const target = e.currentTarget as HTMLElement;
@@ -57,11 +56,12 @@ export interface Props {
 }
 
 
-const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEnter, focusId }: Props) => {
+const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEnter, focusId, onReorder }: Props) => {
     const [items, setItems] = useState<Props['data']>(data);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const cloneRef = useRef<HTMLElement | null>(null);
     const [dragSortOrder, setDragSortOrder] = useState<number | null>(null);
+    const [hoverSortOrder, setHoverSortOrder] = useState<number | null>(null);
 
     const scrollSpeed = 10;
     const scrollThreshold = 80;
@@ -116,6 +116,7 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
         }
 
         const reordered = move<Item>(items, fromIndex, targetIndex);
+        setHoverSortOrder(items[targetIndex].sortOrder);
         setItems(reordered);
     }
 
@@ -136,13 +137,18 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
         }
     };
 
-
-
     const handleDragEnd = () => {
         if (cloneRef.current) {
             document.body.removeChild(cloneRef.current);
         }
+
+        if (items && typeof dragSortOrder == 'number' && typeof hoverSortOrder == 'number') {
+            let reordered = reorderByIndex<Item>(items, dragSortOrder, hoverSortOrder);
+            onReorder?.(reordered);
+        }
+
         setDragSortOrder(null);
+        setHoverSortOrder(null);
     };
 
     return (
