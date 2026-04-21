@@ -83,38 +83,6 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
 
     }
 
-    // function handleDragOver(e: React.DragEvent<HTMLDivElement>, overIndex: number) {
-    //     e.preventDefault();
-    //     handleAutoScroll(e);
-
-    //     const rect = e.currentTarget.getBoundingClientRect();
-
-    //     const offsetY = e.clientY - rect.top;
-    //     const half = rect.height / 2;
-
-
-    //     if (typeof items != 'object') return;
-    //     let hoverSortOrder = items[overIndex].sortOrder;
-
-    //     if (hoverSortOrder == dragSortOrder) return;
-
-    //     const fromIndex = items.findIndex(item => item.sortOrder === dragSortOrder);
-
-    //     if (offsetY < half) {
-    //         if (prevDragIndexRef.current == overIndex) return;
-
-    //         const reordered = move<Item>(items, fromIndex, overIndex);
-    //         setItems(reordered);
-
-    //         prevDragIndexRef.current = fromIndex;
-
-    //     } else {
-    //         const toIndex = overIndex + 1;
-    //         const reordered = move<Item>(items, fromIndex, toIndex);
-    //         setItems(reordered);
-    //         prevDragIndexRef.current = fromIndex;
-    //     }
-    // }
     function handleDragOver(e: React.DragEvent<HTMLDivElement>, overIndex: number) {
         e.preventDefault();
         handleAutoScroll(e);
@@ -196,10 +164,10 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
                             onDragStart={(e) => { handleDragStart(e, sortOrder) }}
                             onDragEnd={handleDragEnd}
                             onDragOver={(e) => { handleDragOver(e, idx) }}
-                        // hide
                         // onDrop
                         // onDragEnter
                         // onDragLeave
+                        // hide
                         />
                     )
                 })
