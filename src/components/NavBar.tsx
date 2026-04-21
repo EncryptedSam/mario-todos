@@ -6,18 +6,18 @@ import { TbConfetti, TbConfettiOff } from 'react-icons/tb';
 
 interface Props {
     volumeSlider: VolumeProps
-    filterDropDown: DropDownProps
     onClickBack?(): void;
     onClickConfetti?(): void;
     confettiValue?: boolean;
     showConfetti?: boolean;
-    
+
     onVolumeChange?(): void;
     volumeValue?: number
+    onChangeFilter?(value: 'all' | 'pending' | 'completed'): void;
 }
 
-const NavBar = ({ volumeSlider, filterDropDown, onClickBack, confettiValue, onClickConfetti, showConfetti }: Props) => {
-
+const NavBar = ({ volumeSlider, onChangeFilter, onClickBack, confettiValue, onClickConfetti, showConfetti }: Props) => {
+    const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
 
     return (
         <div className='flex justify-between items-end pt-2 pb-2' >
@@ -30,7 +30,20 @@ const NavBar = ({ volumeSlider, filterDropDown, onClickBack, confettiValue, onCl
                         <IoChevronBack className='text-sm' />
                     </button>
                 }
-                <DropDown {...filterDropDown} />
+                {/* <DropDown {...filterDropDown} /> */}
+                <DropDown
+
+                    value={filter}
+                    options={[
+                        { value: 'all', lable: 'All' },
+                        { value: 'pending', lable: 'Pending' },
+                        { value: 'completed', lable: 'Completed' }
+                    ]}
+                    onChange={(value) => {
+                        setFilter(value);
+                        onChangeFilter?.(value);
+                    }}
+                />
             </div>
 
             <div className='flex items-center space-x-2' >
