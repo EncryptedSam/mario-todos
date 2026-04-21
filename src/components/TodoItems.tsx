@@ -62,6 +62,17 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
     const containerRef = useRef<HTMLDivElement | null>(null);
     const cloneRef = useRef<HTMLElement | null>(null);
     const [dragSortOrder, setDragSortOrder] = useState<number | null>(null);
+    const prevDragIndexRef = useRef<number | null>(null);
+
+    const scrollSpeed = 10;
+    const scrollThreshold = 80;
+
+    useEffect(() => {
+        if (typeof data == 'object' && data.length > 0) {
+            setItems(data);
+        }
+    }, [data])
+
 
     const handleDragStart = (e: React.DragEvent<HTMLDivElement>, dragSortOrder: number) => {
         setDragSortOrder(dragSortOrder);
@@ -72,8 +83,41 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
 
     }
 
+    // function handleDragOver(e: React.DragEvent<HTMLDivElement>, overIndex: number) {
+    //     e.preventDefault();
+    //     handleAutoScroll(e);
+
+    //     const rect = e.currentTarget.getBoundingClientRect();
+
+    //     const offsetY = e.clientY - rect.top;
+    //     const half = rect.height / 2;
+
+
+    //     if (typeof items != 'object') return;
+    //     let hoverSortOrder = items[overIndex].sortOrder;
+
+    //     if (hoverSortOrder == dragSortOrder) return;
+
+    //     const fromIndex = items.findIndex(item => item.sortOrder === dragSortOrder);
+
+    //     if (offsetY < half) {
+    //         if (prevDragIndexRef.current == overIndex) return;
+
+    //         const reordered = move<Item>(items, fromIndex, overIndex);
+    //         setItems(reordered);
+
+    //         prevDragIndexRef.current = fromIndex;
+
+    //     } else {
+    //         const toIndex = overIndex + 1;
+    //         const reordered = move<Item>(items, fromIndex, toIndex);
+    //         setItems(reordered);
+    //         prevDragIndexRef.current = fromIndex;
+    //     }
+    // }
     function handleDragOver(e: React.DragEvent<HTMLDivElement>, overIndex: number) {
         e.preventDefault();
+        handleAutoScroll(e);
 
         const rect = e.currentTarget.getBoundingClientRect();
 
@@ -88,24 +132,37 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
 
         const fromIndex = items.findIndex(item => item.sortOrder === dragSortOrder);
 
+        let toIndex = overIndex + 0.5;
+
         if (offsetY < half) {
-            let toIndex = overIndex;
+            toIndex = overIndex - 0.5;
             const reordered = move<Item>(items, fromIndex, toIndex);
             setItems(reordered);
-
         } else {
-            const toIndex = overIndex + 1;
+            toIndex = overIndex + 0.5;
             const reordered = move<Item>(items, fromIndex, toIndex);
             setItems(reordered);
-
         }
     }
 
-    useEffect(() => {
-        if (typeof data == 'object' && data.length > 0) {
-            setItems(data);
+    const handleAutoScroll = (e: React.DragEvent) => {
+        if (!containerRef.current) return;
+
+        const container = containerRef.current;
+        const rect = container.getBoundingClientRect();
+
+        const offsetY = e.clientY - rect.top;
+
+        if (offsetY < scrollThreshold) {
+            container.scrollTop -= scrollSpeed;
         }
-    }, [data])
+
+        if (offsetY > rect.height - scrollThreshold) {
+            container.scrollTop += scrollSpeed;
+        }
+    };
+
+
 
     const handleDragEnd = () => {
         if (cloneRef.current) {

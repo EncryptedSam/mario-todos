@@ -156,11 +156,11 @@ const TodoItemCard = forwardRef<HTMLDivElement, Props>(({
             }}
 
             className={`
-                relative p-3 group rounded-2xl bg-gray-100 text-sm flex space-x-3! border border-gray-200
-                ${isEdit ? 'border-gray-400' : ''}
+                rounded-2xl
+                ${hide ? 'relative border border-gray-400 border-dashed bg-transparent' : 'bg-gray-100'}
                 `
             }
-            style={{ opacity: hide ? 0 : 1 }}
+            // style={{ opacity: hide ? 0 : 1 }}
             onDragStart={onDragStart}
             onDragOver={onDragOver}
             onDrop={onDrop}
@@ -170,62 +170,70 @@ const TodoItemCard = forwardRef<HTMLDivElement, Props>(({
             draggable={!isEdit}
 
         >
+            <div
+                className={`
+                    relative p-3 group rounded-2xl text-sm flex space-x-3! border border-gray-200
+                    ${isEdit ? 'border-gray-400' : ''}
+                    ${hide ? 'opacity-0' : ''}
+                `}
+            >
+                {isChecked ? (
+                    <div
+                        className='shrink-0 w-5 h-5 bg-no-repeat bg-cover bg-center cursor-pointer mario-hit'
+                        onClick={handleCheck}
+                        style={{
+                            backgroundImage: "url('/coin.gif')",
+                            backgroundSize: '30px'
+                        }}
+                    />
+                ) : (
+                    <div
+                        className='shrink-0 w-5 h-5 border border-gray-400 rounded-full cursor-pointer'
+                        onClick={handleCheck}
+                    />
+                )}
 
-            {isChecked ? (
-                <div
-                    className='shrink-0 w-5 h-5 bg-no-repeat bg-cover bg-center cursor-pointer mario-hit'
-                    onClick={handleCheck}
-                    style={{
-                        backgroundImage: "url('/coin.gif')",
-                        backgroundSize: '30px'
-                    }}
-                />
-            ) : (
-                <div
-                    className='shrink-0 w-5 h-5 border border-gray-400 rounded-full cursor-pointer'
-                    onClick={handleCheck}
-                />
-            )}
-
-            <div className='relative flex flex-1' >
-                <textarea
-                    ref={textareaRef}
-                    className={`
+                <div className='relative flex flex-1' >
+                    <textarea
+                        ref={textareaRef}
+                        className={`
                     w-full resize-none overflow-hidden bg-transparent outline-none 
                     ${isEdit ? '' : 'cursor-pointer select-text'}
                     `
-                    }
-                    onChange={(e) => handleTextareaChange(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    rows={1}
-                    placeholder="Untitled"
-                    value={text}
-                    readOnly={!isEdit}
-                />
-                {!isEdit &&
-                    <div
-                        className='absolute top-0 left-0 w-full h-full cursor-pointer'
-                        onDoubleClick={() => {
-                            setIsEdit(true);
-                        }}
+                        }
+                        onChange={(e) => handleTextareaChange(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        rows={1}
+                        placeholder="Untitled"
+                        value={text}
+                        readOnly={!isEdit}
                     />
-                }
-            </div>
-
-            <SideDropMenu
-                options={[
-                    {
-                        icon: <MdOutlineEdit className='text-gray-700' />,
-                        label: 'Edit',
-                        onClick: () => { setIsEdit(true) }
-                    },
-                    {
-                        icon: <MdDeleteOutline className='text-red-500' />,
-                        label: 'Delete',
-                        onClick: () => { onDelete?.() }
+                    {!isEdit &&
+                        <div
+                            className='absolute top-0 left-0 w-full h-full cursor-pointer'
+                            onDoubleClick={() => {
+                                setIsEdit(true);
+                            }}
+                        />
                     }
-                ]}
-            />
+                </div>
+
+                <SideDropMenu
+                    options={[
+                        {
+                            icon: <MdOutlineEdit className='text-gray-700' />,
+                            label: 'Edit',
+                            onClick: () => { setIsEdit(true) }
+                        },
+                        {
+                            icon: <MdDeleteOutline className='text-red-500' />,
+                            label: 'Delete',
+                            onClick: () => { onDelete?.() }
+                        }
+                    ]}
+                />
+
+            </div>
         </div>
     );
 });
