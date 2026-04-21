@@ -19,7 +19,7 @@ const TodoItemsContainers = () => {
 
     const [deleteId, setDeleteId] = useState<number | null>(null);
 
-    const [filter, setFilter] = useState<string>('all');
+    const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
     const [localVolume, setLocalVolume] = useState<number>(0);
     const [inputFocusId, setInputFocusId] = useState<number | null>(null);
     const [showConfetti, setShowConfetti] = useState<boolean>(true);
@@ -147,16 +147,21 @@ const TodoItemsContainers = () => {
     }
 
     const mappedItems: TodoItemsProps['data'] = useMemo(() => {
-        return items.map(({ completed, content, sortOrder, id }) => {
-
-            return {
-                id: Number(id),
-                sortOrder,
-                value: content,
-                checked: completed
-            }
-        });
-    }, [items])
+        return items
+            .filter(({ completed }) => {
+                if (filter === 'completed') return completed;
+                if (filter === 'pending') return !completed;
+                return true; // 'all'
+            })
+            .map(({ completed, content, sortOrder, id }) => {
+                return {
+                    id: Number(id),
+                    sortOrder,
+                    value: content,
+                    checked: completed
+                }
+            });
+    }, [items, filter]);
 
 
     return (
