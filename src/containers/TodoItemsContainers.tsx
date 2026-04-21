@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import NavBar from '../components/NavBar'
 import TodoGroupCard from '../components/TodoGroupCard'
 import TodoItemCard from '../components/TodoItemCard'
@@ -145,15 +145,18 @@ const TodoItemsContainers = () => {
         }
     }
 
-    const mappedItems: TodoItemsProps['data'] = items.map(({ completed, content, sortOrder, id }) => {
+    const mappedItems: TodoItemsProps['data'] = useMemo(() => {
+        return items.map(({ completed, content, sortOrder, id }) => {
 
-        return {
-            id: Number(id),
-            sortOrder,
-            value: content,
-            checked: completed
-        }
-    });
+            return {
+                id: Number(id),
+                sortOrder,
+                value: content,
+                checked: completed
+            }
+        });
+    }, [items])
+
 
     return (
         <>

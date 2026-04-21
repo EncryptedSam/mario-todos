@@ -282,7 +282,7 @@ const TodoItemsContainers = () => {
             percentage = 0;
         }
     }
-
+    
     return (
         <>
             <NavBar
