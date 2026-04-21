@@ -36,7 +36,7 @@ export interface Props {
 
 const DEBOUNCE_DELAY = 400;
 
-const TodoItemCard = ({
+const TodoItemCard = forwardRef<HTMLDivElement, Props>(({
     value,
     onChangeText,
     checked = false,
@@ -57,7 +57,7 @@ const TodoItemCard = ({
     onUp,
     onDown,
     focusKey
-}: Props) => {
+}: Props, ref) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [text, setText] = useState(value);
     const [isChecked, setIsChecked] = useState<boolean>(checked);
@@ -231,7 +231,16 @@ const TodoItemCard = ({
 
     return (
         <div
-            ref={containerRef}
+            // ref={containerRef}
+            ref={(el) => {
+                containerRef.current = el;
+
+                if (typeof ref === "function") {
+                    ref(el);
+                } else if (ref) {
+                    (ref as React.RefObject<HTMLDivElement | null>).current = el;
+                }
+            }}
 
             className={`
                 rounded-2xl
@@ -314,6 +323,6 @@ const TodoItemCard = ({
             </div>
         </div>
     );
-}
+});
 
 export default TodoItemCard;

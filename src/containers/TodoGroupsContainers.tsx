@@ -48,8 +48,6 @@ const TodoGroupsContainers = () => {
         setVolume(value);
     }
 
-    console.log(groups);
-
     return (
         < >
             <NavBar

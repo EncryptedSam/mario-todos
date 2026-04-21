@@ -64,6 +64,7 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
     const cloneRef = useRef<HTMLElement | null>(null);
     const [dragSortOrder, setDragSortOrder] = useState<number | null>(null);
     const [hoverSortOrder, setHoverSortOrder] = useState<number | null>(null);
+    const [focusState, setFocusState] = useState<{ id: number, key: number } | null>(null);
 
     const scrollSpeed = 10;
     const scrollThreshold = 80;
@@ -79,7 +80,6 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
         if (cloneRef != null) {
             cloneRef.current = createClone(e);
         }
-
     }
 
     function handleDragOver(e: React.DragEvent<HTMLDivElement>, overIndex: number) {
@@ -151,6 +151,18 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
         setHoverSortOrder(null);
     };
 
+    const handleOnUp = (prevId?: number) => {
+        if (prevId) {
+            setFocusState({ id: prevId, key: Date.now() });
+        }
+    };
+
+    const handleOnDown = (nextId?: number) => {
+        if (nextId) {
+            setFocusState({ id: nextId, key: Date.now() });
+        }
+    };
+
     return (
         <div
             ref={containerRef}
@@ -164,6 +176,11 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
                         prevFocusId = items[idx - 1].id;
                     }
 
+                    let nextFocusId: number;
+                    if (idx + 1 < items.length) {
+                        nextFocusId = items[idx + 1].id;
+                    }
+
                     let alignDropMenu: 'top' | 'bottom' = 'top';
                     if (idx == items.length - 1 && idx > 0) {
                         alignDropMenu = 'bottom';
@@ -175,6 +192,8 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
                             value={value}
                             checked={checked}
                             focus={focusId == id}
+                            focusKey={focusState?.id === id ? focusState.key : undefined}
+
                             volume={volume}
                             hide={sortOrder == dragSortOrder}
 
@@ -182,15 +201,14 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
                             onClickCheck={(value) => { onClickCheck(id, value) }}
                             onDelete={() => { onDelete(id) }}
                             onHitEnter={() => { onHitEnter(sortOrder + 1) }}
+                            onEmptyDelete={() => { onEmptyDelete?.(id, prevFocusId) }}
 
                             onDragStart={(e) => { handleDragStart(e, sortOrder) }}
                             onDragEnd={handleDragEnd}
                             onDragOver={(e) => { handleDragOver(e, idx) }}
                             alignDropMenu={alignDropMenu}
-                            onEmptyDelete={() => { onEmptyDelete?.(id, prevFocusId) }}
-                        // onDrop
-                        // onDragEnter
-                        // onDragLeave
+                            onUp={() => { handleOnUp(prevFocusId) }}
+                            onDown={() => { handleOnDown(nextFocusId) }}
                         />
                     )
                 })
