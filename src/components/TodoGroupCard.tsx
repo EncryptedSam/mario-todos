@@ -25,6 +25,7 @@ interface Props {
 const DEBOUNCE_DELAY = 400;
 
 const TodoGroupCard = ({
+    type = 'progress',
     readonly,
     value,
     onChange,
@@ -166,7 +167,7 @@ const TodoGroupCard = ({
             </div>
 
             <div className="relative w-full h-2 rounded-full overflow-hidden">
-                {!readonly &&
+                {type == 'progress' &&
                     <div className='w-full h-full bg-gray-300' >
                         <div
                             className="absolute h-full bg-red-500 transition-all duration-300 rounded-full"
@@ -174,7 +175,7 @@ const TodoGroupCard = ({
                         />
                     </div>
                 }
-                {readonly &&
+                {type == 'step' &&
                     <div className='absolute space-x-1 top-0 left-0 flex w-full h-full items-center justify-between' >
                         {
                             dots.map((_, idx) => {

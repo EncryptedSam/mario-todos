@@ -11,6 +11,7 @@ export interface Props {
     checked?: boolean
     onClickCheck?(value: boolean): void
 
+    onEmptyDelete?(): void;
     onDelete?(): void;
     volume?: number
 
@@ -47,7 +48,8 @@ const TodoItemCard = forwardRef<HTMLDivElement, Props>(({
     onDragLeave,
     onDragEnd,
     hide,
-    alignDropMenu
+    alignDropMenu,
+    onEmptyDelete
 }: Props, ref) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [text, setText] = useState(value);
@@ -55,7 +57,7 @@ const TodoItemCard = forwardRef<HTMLDivElement, Props>(({
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
     const debounceRef = useRef<number | null>(null);
     const [isEdit, setIsEdit] = useState<boolean>(false);
-
+    const backspaceCountRef = useRef(0);
 
     useEscape(() => {
         setIsEdit(false);
@@ -94,6 +96,12 @@ const TodoItemCard = forwardRef<HTMLDivElement, Props>(({
             setIsEdit(true);
         }
     }, [focus]);
+
+    useEffect(() => {
+        if (text.trim() !== "") {
+            backspaceCountRef.current = 0;
+        }
+    }, [text]);
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
@@ -143,6 +151,23 @@ const TodoItemCard = forwardRef<HTMLDivElement, Props>(({
             onHitEnter?.();
             setIsEdit(false);
         }
+
+
+        if (e.key === "Backspace") {
+            if (text.trim() === "") {
+                backspaceCountRef.current += 1;
+
+                if (backspaceCountRef.current >= 2) {
+                    e.preventDefault();
+                    onEmptyDelete?.();
+                    backspaceCountRef.current = 0;
+                }
+            } else {
+                backspaceCountRef.current = 0;
+            }
+        } else {
+            backspaceCountRef.current = 0;
+        }
     };
 
 
@@ -163,7 +188,6 @@ const TodoItemCard = forwardRef<HTMLDivElement, Props>(({
                 ${hide ? 'relative border border-gray-400 border-dashed bg-transparent' : 'bg-gray-100'}
                 `
             }
-            // style={{ opacity: hide ? 0 : 1 }}
             onDragStart={onDragStart}
             onDragOver={onDragOver}
             onDrop={onDrop}

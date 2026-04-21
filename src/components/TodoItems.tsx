@@ -53,10 +53,12 @@ export interface Props {
 
     onClickCheck: (itemId: number, value: boolean) => void,
     onHitEnter: (sortOrder: number) => void,
+
+    onEmptyDelete?: (itemId: number, focusId?: number) => void;
 }
 
 
-const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEnter, focusId, onReorder }: Props) => {
+const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEnter, focusId, onReorder, onEmptyDelete }: Props) => {
     const [items, setItems] = useState<Props['data']>(data);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const cloneRef = useRef<HTMLElement | null>(null);
@@ -67,9 +69,7 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
     const scrollThreshold = 80;
 
     useEffect(() => {
-        if (typeof data == 'object' && data.length > 0) {
-            setItems(data);
-        }
+        setItems(data);
     }, [data])
 
 
@@ -154,10 +154,20 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
     return (
         <div
             ref={containerRef}
-            className='flex-1 pt-2.5 space-y-2.5! min-h-0 scroll-hidden scroll-smooth overflow-auto'
+            className='flex-1 mt-2.5 space-y-2.5! min-h-0 scroll-hidden scroll-smooth overflow-auto'
         >
             {
                 items?.map(({ id, sortOrder, value, checked }, idx) => {
+
+                    let prevFocusId: number;
+                    if (idx - 1 >= 0) {
+                        prevFocusId = items[idx - 1].id;
+                    }
+
+                    let alignDropMenu: 'top' | 'bottom' = 'top';
+                    if (idx == items.length - 1 && idx > 0) {
+                        alignDropMenu = 'bottom';
+                    }
 
                     return (
                         <TodoItemCard
@@ -176,11 +186,11 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
                             onDragStart={(e) => { handleDragStart(e, sortOrder) }}
                             onDragEnd={handleDragEnd}
                             onDragOver={(e) => { handleDragOver(e, idx) }}
-                            alignDropMenu={idx == items.length - 1 ? 'bottom' : 'top'}
+                            alignDropMenu={alignDropMenu}
+                            onEmptyDelete={() => { onEmptyDelete?.(id, prevFocusId) }}
                         // onDrop
                         // onDragEnter
                         // onDragLeave
-                        // hide
                         />
                     )
                 })

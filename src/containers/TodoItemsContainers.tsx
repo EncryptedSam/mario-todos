@@ -104,10 +104,27 @@ const TodoItemsContainers = () => {
     }
 
     const handleDeleteItem = async () => {
-        await deleteItem(Number(deleteId));
+        if (typeof deleteId == 'number') {
+            await deleteItem(deleteId);
+            await loadItems();
+            await loadGroup();
+            setDeleteId(null)
+        }
+    }
+
+    const handleDeleteItemOnEmpty = async (id: number, focusId?: number) => {
+        await deleteItem(id);
         await loadItems();
         await loadGroup();
         setDeleteId(null)
+        if (focusId) {
+            setInputFocusId(focusId);
+            clearTimeout(itemIdTimeoutRef.current);
+
+            itemIdTimeoutRef.current = setTimeout(() => {
+                setInputFocusId(null);
+            }, 200)
+        }
     }
 
     const handleVolume = async (value: number) => {
@@ -172,6 +189,7 @@ const TodoItemsContainers = () => {
                         value={group.title ?? ''}
                         completed={group.completed}
                         total={group.total}
+                        type='step'
                         readonly
                     />
                 }
@@ -186,6 +204,7 @@ const TodoItemsContainers = () => {
                 onClickCheck={(id, value) => { handleUpdateCompleted(id, value) }}
                 onHitEnter={(sortOrder) => { handleCreateItem(sortOrder) }}
                 onReorder={handleBulkReorder}
+                onEmptyDelete={handleDeleteItemOnEmpty}
             />
             <AddNewButton
                 type='task'
