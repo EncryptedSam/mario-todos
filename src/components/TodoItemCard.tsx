@@ -17,6 +17,8 @@ export interface Props {
     onHitEnter?(): void;
     focus?: boolean;
 
+    alignDropMenu?: 'top' | 'bottom';
+
     // 👇 drag events
     onDragStart?(e: React.DragEvent<HTMLDivElement>): void;
     onDragOver?(e: React.DragEvent<HTMLDivElement>): void;
@@ -44,7 +46,8 @@ const TodoItemCard = forwardRef<HTMLDivElement, Props>(({
     onDragEnter,
     onDragLeave,
     onDragEnd,
-    hide
+    hide,
+    alignDropMenu
 }: Props, ref) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [text, setText] = useState(value);
@@ -219,6 +222,7 @@ const TodoItemCard = forwardRef<HTMLDivElement, Props>(({
                 </div>
 
                 <SideDropMenu
+                    alignBottm={alignDropMenu == 'bottom'}
                     options={[
                         {
                             icon: <MdOutlineEdit className='text-gray-700' />,

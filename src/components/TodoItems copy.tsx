@@ -89,7 +89,7 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
         const rect = e.currentTarget.getBoundingClientRect();
 
         const offsetY = e.clientY - rect.top;
-        const threshold = rect.height / 2;
+        const threshold = 20;
 
         if (typeof items != 'object') return;
         let hoverSortOrder = items[overIndex].sortOrder;
@@ -100,23 +100,35 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
 
         let toIndex = overIndex;
 
-        const isAbove = offsetY < threshold;
-        const isBelow = offsetY > rect.height - threshold;
-
-        if (!isAbove && !isBelow) return;
-
-        let targetIndex = toIndex;
-
-        if (isAbove) {
-            if (fromIndex < toIndex && toIndex - fromIndex === 1) return;
-        } else {
-            if (!(fromIndex < toIndex && toIndex - fromIndex === 1)) {
-                targetIndex = toIndex + 1;
+        if (offsetY < threshold) {
+            if (fromIndex < toIndex && (toIndex - fromIndex) == 1) return;
+            const reordered = move<Item>(items, fromIndex, toIndex);
+            setItems(reordered);
+        } else if (offsetY > rect.height - threshold) {
+            if (fromIndex < toIndex && (toIndex - fromIndex) == 1) {
+                toIndex = toIndex;
+                console.log('yea')
+            } else {
+                toIndex = toIndex + 1;
             }
+            const reordered = move<Item>(items, fromIndex, toIndex);
+            setItems(reordered);
         }
+        // let toIndex = overIndex + 0.5;
 
-        const reordered = move<Item>(items, fromIndex, targetIndex);
-        setItems(reordered);
+        // if (offsetY < threshold) {
+        //     toIndex = toIndex - 0.5;
+        //     if (toIndex % 1 == 0) {
+        //         const reordered = move<Item>(items, fromIndex, toIndex);
+        //         setItems(reordered);
+        //     }
+        // } else if (offsetY > rect.height - threshold) {
+        //     toIndex = toIndex + 0.5;
+        //     if (toIndex % 1 == 0) {
+        //         const reordered = move<Item>(items, fromIndex, toIndex);
+        //         setItems(reordered);
+        //     }
+        // }
     }
 
     const handleAutoScroll = (e: React.DragEvent) => {
