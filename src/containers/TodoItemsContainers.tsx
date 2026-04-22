@@ -209,7 +209,10 @@ const TodoItemsContainers = () => {
             />
             {
                 (showConfetti && percentage == 100) &&
-                <Confetti recycle={true} />
+                <Confetti
+                    className='h-full m-auto'
+                    recycle={true}
+                />
             }
             {
                 deleteId &&

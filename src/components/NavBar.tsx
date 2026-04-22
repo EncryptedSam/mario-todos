@@ -40,7 +40,9 @@ const NavBar = ({ volumeSlider, onChangeFilter, onClickBack, confettiValue, onCl
                         { value: 'completed', lable: 'Completed' }
                     ]}
                     onChange={(value) => {
+                        // @ts-ignore
                         setFilter(value);
+                        // @ts-ignore
                         onChangeFilter?.(value);
                     }}
                 />

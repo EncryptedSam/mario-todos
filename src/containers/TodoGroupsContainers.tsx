@@ -51,15 +51,7 @@ const TodoGroupsContainers = () => {
     return (
         < >
             <NavBar
-                filterDropDown={{
-                    value: filter,
-                    options: [
-                        { value: 'all', lable: 'All' },
-                        { value: 'pending', lable: 'Pending' },
-                        { value: 'completed', lable: 'Completed' }
-                    ],
-                    onChange: setFilter,
-                }}
+
 
                 volumeSlider={{
                     value: localVolume,

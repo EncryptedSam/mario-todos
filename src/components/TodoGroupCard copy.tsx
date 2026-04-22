@@ -13,7 +13,8 @@ interface Props {
     readonly?: boolean;
     total: number;
     completed: number;
-
+    alignBottm?: boolean;
+    // drag events
     onDragStart?(e: React.DragEvent<HTMLDivElement>): void;
     onDragOver?(e: React.DragEvent<HTMLDivElement>): void;
     onDrop?(e: React.DragEvent<HTMLDivElement>): void;
@@ -31,6 +32,7 @@ const TodoGroupCard = ({
     onChange,
     onDelete,
     onClick,
+    alignBottm,
     total,
     completed,
     onDragStart,
@@ -169,8 +171,24 @@ const TodoGroupCard = ({
                         }
                         onClick={(e) => { e.stopPropagation(); onDelete?.() }}
                     >
+                        {/* <MdDeleteOutline className='text-red-500' /> */}
                         <BsTrash className='text-red-500' />
                     </button>
+                    // <SideDropMenu
+                    //     alignBottm={alignBottm}
+                    //     options={[
+                    //         {
+                    //             icon: <MdOutlineEdit className='text-gray-700' />,
+                    //             label: 'Edit',
+                    //             onClick: () => { setIsEdit(true) }
+                    //         },
+                    //         {
+                    //             icon: <MdDeleteOutline className='text-red-500' />,
+                    //             label: 'Delete',
+                    //             onClick: () => { onDelete?.() }
+                    //         }
+                    //     ]}
+                    // />
                 }
                 {readonly &&
                     <span className='inline-flex shrink-0 items-end w-10 justify-end'>

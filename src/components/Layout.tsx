@@ -42,7 +42,7 @@ const Layout = ({ children }: Props) => {
                         backgroundSize: '130px'
                     }}
                 >
-                    <main className='flex flex-col w-full h-full px-2' >
+                    <main className='relative flex flex-col w-full h-full px-2' >
                         {children}
                     </main>
                 </div>

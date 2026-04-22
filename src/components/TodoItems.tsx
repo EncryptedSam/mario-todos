@@ -191,8 +191,9 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
                             key={`${id}_${sortOrder}`}
                             value={value}
                             checked={checked}
+
                             focus={focusId == id}
-                            focusKey={focusState?.id === id ? focusState.key : undefined}
+                            focusKey={(focusState?.id === id) ? focusState.key : undefined}
 
                             volume={volume}
                             hide={sortOrder == dragSortOrder}
