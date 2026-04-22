@@ -17,13 +17,13 @@ const AddNewButton = ({ type, onClick, className }: Props) => {
             >
                 {type == 'group' &&
                     <>
-                        <span>Add New Group</span>
+                        <span>Create New Group</span>
                         <AiOutlineContainer className='text-[16px]' />
                     </>
                 }
                 {type == 'task' &&
                     <>
-                        <span>Add New Task</span>
+                        <span>Create New Task</span>
                         <MdOutlineAddTask className='text-[16px]' />
                     </>
                 }
