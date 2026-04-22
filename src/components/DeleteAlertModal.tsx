@@ -8,7 +8,7 @@ interface Props {
 }
 
 
-const DeleteAlertModal = ({ placeholder, onCancel, onDelete }: Props) => {
+const DeleteAlertModal = ({ placeholder = '<placeholder>', onCancel, onDelete }: Props) => {
     return (
         <div
             className='absolute flex items-center justify-center top-0 left-0 z-1 w-full h-full'
@@ -19,8 +19,8 @@ const DeleteAlertModal = ({ placeholder, onCancel, onDelete }: Props) => {
                     <BsExclamationCircle className='text-red-500' />
                 </span>
                 <div className='mb-5' >
-                    <h1 className='font-medium text-gray-900 text-center text-lg'>Delete Item</h1>
-                    <p className='text-xs text-gray-800 text-center'>Are you sure want to delete this Item?</p>
+                    <h1 className='font-medium text-gray-900 text-center text-lg'>Delete {placeholder}</h1>
+                    <p className='text-xs text-gray-800 text-center'>Are you sure want to delete this {placeholder}?</p>
                     <p className='text-xs text-gray-800 text-center'>This action cannot be undone.</p>
                 </div>
                 <div className='flex space-x-2' >

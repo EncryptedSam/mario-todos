@@ -172,7 +172,6 @@ const TodoItemCard = ({
         const cursorEnd = el.selectionEnd;
         const length = el.value.length;
 
-        // ENTER
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
             onHitEnter?.();
@@ -180,7 +179,6 @@ const TodoItemCard = ({
             return;
         }
 
-        // BACKSPACE DOUBLE EMPTY
         if (e.key === "Backspace") {
             if (text.trim() === "") {
                 backspaceCountRef.current += 1;
@@ -275,9 +273,9 @@ const TodoItemCard = ({
                     <textarea
                         ref={textareaRef}
                         className={`
-                    w-full resize-none overflow-hidden bg-transparent outline-none 
-                    ${isEdit ? '' : 'cursor-pointer select-text'}
-                    `
+                            w-full resize-none overflow-hidden bg-transparent outline-none 
+                            ${isEdit ? '' : 'cursor-pointer select-text'}
+                            `
                         }
                         onChange={(e) => handleTextareaChange(e.target.value)}
                         onKeyDown={handleKeyDown}

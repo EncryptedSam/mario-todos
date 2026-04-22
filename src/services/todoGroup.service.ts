@@ -2,10 +2,7 @@ import { db } from "../db";
 import type { TodoGroupWithStats } from "../db/schema";
 
 // CREATE
-export const createGroup = async (
-  title: string,
-  sortOrder?: number
-) => {
+export const createGroup = async (title: string, sortOrder?: number) => {
   const groups = await db.todoGroups.orderBy("sortOrder").toArray();
 
   // case 1: no groups
@@ -27,7 +24,7 @@ export const createGroup = async (
   const newOrder = Math.min(sortOrder, maxOrder + 1);
 
   // case 4: shift affected groups
-  await db.transaction("rw", db.todoGroups, async () => {
+  return db.transaction("rw", db.todoGroups, async () => {
     for (const group of groups) {
       if (group.sortOrder >= newOrder) {
         await db.todoGroups.update(group.id!, {
@@ -36,11 +33,13 @@ export const createGroup = async (
       }
     }
 
-    await db.todoGroups.add({
+    // ✅ return this
+    return db.todoGroups.add({
       title,
       sortOrder: newOrder,
     });
   });
+
 };
 
 // READ ALL (sorted)
@@ -65,7 +64,7 @@ export const updateGroupOrder = (id: number, sortOrder: number) => {
 
 // UPDATE SORT ORDER BULK
 export const bulkUpdateGroupOrder = async (
-  groups: { id: number; sortOrder: number }[]
+  groups: { id: number; sortOrder: number }[],
 ) => {
   await db.transaction("rw", db.todoGroups, async () => {
     for (const group of groups) {

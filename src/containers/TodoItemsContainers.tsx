@@ -11,6 +11,7 @@ import { getItemsByGroup, createItem, bulkUpdateItemOrder, updateItemCompleted, 
 import Confetti from 'react-confetti'
 import DeleteAlertModal from '../components/DeleteAlertModal'
 import TodoItems, { type Props as TodoItemsProps } from '../components/TodoItems'
+import useEscape from '../hooks/useEscape'
 
 
 const TodoItemsContainers = () => {
@@ -50,6 +51,10 @@ const TodoItemsContainers = () => {
         const rows = await getGroupByIdWithStats(Number(groupId));
         setGroup(rows);
     }
+
+    useEscape(() => {
+        setDeleteId(null);
+    });
 
     useEffect(() => {
         (async () => {
@@ -219,6 +224,7 @@ const TodoItemsContainers = () => {
                 <DeleteAlertModal
                     onCancel={() => { setDeleteId(null) }}
                     onDelete={handleDeleteItem}
+                    placeholder='Item'
                 />
             }
         </>

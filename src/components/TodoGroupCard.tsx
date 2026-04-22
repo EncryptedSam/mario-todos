@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
-import SideDropMenu from './shared/SideDropMenu';
-import { MdDeleteOutline, MdOutlineEdit } from 'react-icons/md';
 import { BsTrash } from 'react-icons/bs';
+import useEscape from '../hooks/useEscape';
 
 interface Props {
     type?: 'progress' | 'step';
@@ -10,6 +9,12 @@ interface Props {
     onChange?(value: string): void;
     onClick?(): void;
 
+    onHitEnter?(): void;
+    onEmptyDelete?(): void;
+    onUp?(): void;
+    onDown?(): void;
+
+    focus?: boolean;
     readonly?: boolean;
     total: number;
     completed: number;
@@ -39,7 +44,11 @@ const TodoGroupCard = ({
     onDragEnter,
     onDragLeave,
     onDragEnd,
-
+    onEmptyDelete,
+    onUp,
+    onDown,
+    onHitEnter,
+    focus
 }: Props) => {
     const [text, setText] = useState(value);
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -47,6 +56,7 @@ const TodoGroupCard = ({
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [isEdit, setIsEdit] = useState<boolean>(false);
     const [readMore, setReadMore] = useState<boolean>(false);
+    const backspaceCountRef = useRef(0);
 
     const autoResize = () => {
         const el = textareaRef.current;
@@ -55,6 +65,10 @@ const TodoGroupCard = ({
         el.style.height = "auto";
         el.style.height = el.scrollHeight + "px";
     };
+
+    useEscape(() => {
+        setIsEdit(false);
+    });
 
     useEffect(() => {
         setText(value);
@@ -76,6 +90,13 @@ const TodoGroupCard = ({
         onClick?.();
     }
 
+
+    useEffect(() => {
+        if (focus) {
+            setIsEdit(true);
+        }
+    }, [focus]);
+
     useEffect(() => {
         if (isEdit && textareaRef.current) {
             const el = textareaRef.current;
@@ -83,7 +104,9 @@ const TodoGroupCard = ({
             el.focus();
 
             const length = el.value.length;
-            el.setSelectionRange(length, length);
+            if (length == 0) {
+                el.setSelectionRange(length, length);
+            }
 
             autoResize();
         }
@@ -105,6 +128,75 @@ const TodoGroupCard = ({
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        const el = textareaRef.current;
+        if (!el) return;
+
+        const cursorStart = el.selectionStart;
+        const cursorEnd = el.selectionEnd;
+        const length = el.value.length;
+
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            onHitEnter?.();
+            setIsEdit(false);
+            return;
+        }
+
+        if (e.key === "Backspace") {
+            if (text.trim() === "") {
+                backspaceCountRef.current += 1;
+
+                if (backspaceCountRef.current >= 2) {
+                    e.preventDefault();
+
+                    if (total == 0) {
+                        onEmptyDelete?.();
+                    } else {
+                        onDelete?.();
+                    }
+
+                    backspaceCountRef.current = 0;
+                }
+            } else {
+                backspaceCountRef.current = 0;
+            }
+            return;
+        } else {
+            backspaceCountRef.current = 0;
+        }
+
+        if (e.key === "ArrowUp") {
+            if (e.ctrlKey) {
+                e.preventDefault();
+                onUp?.();
+                return;
+            }
+
+            const isAtStart = cursorStart === 0 && cursorEnd === 0;
+
+            if (isAtStart) {
+                e.preventDefault();
+                onUp?.();
+            }
+        }
+
+        if (e.key === "ArrowDown") {
+            if (e.ctrlKey) {
+                e.preventDefault();
+                onDown?.();
+                return;
+            }
+
+            const isAtEnd = cursorStart === length && cursorEnd === length;
+
+            if (isAtEnd) {
+                e.preventDefault();
+                onDown?.();
+            }
+        }
+    };
 
 
     let percentage: number = ((completed / total) * 100);
@@ -141,6 +233,7 @@ const TodoGroupCard = ({
                         className={`flex-1 w-full resize-none overflow-hidden bg-transparent outline-none cursor-text`}
                         value={text}
                         onChange={(e) => handleChange(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         rows={1}
                         placeholder="Untitled"
                         onClick={(e) => { e.stopPropagation(); setIsEdit(true) }}
@@ -150,9 +243,14 @@ const TodoGroupCard = ({
                 {readonly &&
                     <div className={`flex-1 overflow-hidden space-y-1`} >
                         <p
-                            className={`w-full cursor-pointer ${!readMore ? 'overflow-hidden text-nowrap text-ellipsis' : ''}`}
+                            className={
+                                `
+                                w-full cursor-pointer ${!readMore ? 'overflow-hidden text-nowrap text-ellipsis' : ''}
+                                ${text.length == 0 ? 'text-gray-400' : ''}
+                                `
+                            }
                             onClick={() => { setReadMore(true) }}
-                        >{text}</p>
+                        >{text ? text : 'Untitled'}</p>
                         {readMore &&
                             <button
                                 className='text-gray-700 cursor-pointer'
@@ -164,12 +262,12 @@ const TodoGroupCard = ({
                 {!readonly &&
                     <button
                         className={`
-                            inline-flex text-red-500 hover:text-red-600 text-sm items-center justify-center shrink-0 grow-0 w-5 h-5 cursor-pointer opacity-70 hover:opacity-100
+                            inline-flex text-red-700 hover:text-red-800 text-sm items-center justify-center shrink-0 grow-0 w-5 h-5 cursor-pointer opacity-70 hover:opacity-100
                             `
                         }
                         onClick={(e) => { e.stopPropagation(); onDelete?.() }}
                     >
-                        <BsTrash className='text-red-500' />
+                        <BsTrash />
                     </button>
                 }
                 {readonly &&
