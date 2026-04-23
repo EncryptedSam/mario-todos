@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import TodoGroupCard from './TodoGroupCard';
 import type { TodoGroupWithStats } from '../db/schema';
 
@@ -13,19 +13,16 @@ interface Props {
 
     onHitEnter: (sortOrder: number) => void;
     onEmptyDelete?: (itemId: number, focusId?: number) => void;
+    onUp?: (focusGroupId?: number) => void;
+    onDown?: (focusGroupId?: number) => void;
 }
 
-const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDelete, focusId }: Props) => {
+const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDelete, focusId, onUp, onDown }: Props) => {
     const [groups, setGroups] = useState(data);
-    const [focusGroupId, setFocusGroupId] = useState<number | undefined>(undefined);
 
     useEffect(() => {
         setGroups(data);
     }, [data])
-
-    useEffect(() => {
-        setFocusGroupId(undefined);
-    }, [focusId])
 
 
     return (
@@ -37,14 +34,12 @@ const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDele
                     let nextFocusId: number | undefined;
 
                     if (groups.length > 0) {
-                        // prev
                         if (idx > 0) {
                             prevFocusId = groups[idx - 1].id;
                         } else {
                             prevFocusId = groups[0].id;
                         }
 
-                        // next
                         if (idx < groups.length - 1) {
                             nextFocusId = groups[idx + 1].id;
                         } else {
@@ -52,14 +47,13 @@ const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDele
                         }
                     }
 
-
                     return (
                         <TodoGroupCard
                             key={`todo_group_${id}_${sortOrder}`}
                             value={title}
                             completed={completed}
                             total={total}
-                            focus={focusId == id || focusGroupId == id}
+                            focus={focusId == id}
 
                             onEmptyDelete={() => { onEmptyDelete?.(Number(id), prevFocusId) }}
                             onChange={(value) => { onChange?.(Number(id), value) }}
@@ -67,8 +61,8 @@ const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDele
                             onClick={() => { onClick?.(Number(id)) }}
                             onHitEnter={() => { onHitEnter(sortOrder + 1) }}
 
-                            onUp={() => { setFocusGroupId(prevFocusId) }}
-                            onDown={() => { setFocusGroupId(nextFocusId) }}
+                            onUp={() => { onUp?.(prevFocusId) }}
+                            onDown={() => { onDown?.(nextFocusId) }}
                         />
                     )
                 })

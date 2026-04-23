@@ -63,6 +63,8 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
     const containerRef = useRef<HTMLDivElement | null>(null);
     const cloneRef = useRef<HTMLElement | null>(null);
     const [dragSortOrder, setDragSortOrder] = useState<number | null>(null);
+    const [dragIndex, setDragIndex] = useState<number | null>(null);
+    const [overIndex, setOverIndex] = useState<number | null>(null);
     const [hoverSortOrder, setHoverSortOrder] = useState<number | null>(null);
     const [focusState, setFocusState] = useState<{ id: number, key: number } | null>(null);
 
@@ -74,8 +76,9 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
     }, [data])
 
 
-    const handleDragStart = (e: React.DragEvent<HTMLDivElement>, dragSortOrder: number) => {
+    const handleDragStart = (e: React.DragEvent<HTMLDivElement>, dragSortOrder: number, dragIndex: number) => {
         setDragSortOrder(dragSortOrder);
+        setDragIndex(dragIndex);
 
         if (cloneRef != null) {
             cloneRef.current = createClone(e);
@@ -117,6 +120,7 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
 
         const reordered = move<Item>(items, fromIndex, targetIndex);
         setHoverSortOrder(items[targetIndex].sortOrder);
+        setOverIndex(targetIndex);
         setItems(reordered);
     }
 
@@ -142,7 +146,7 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
             document.body.removeChild(cloneRef.current);
         }
 
-        if (items && typeof dragSortOrder == 'number' && typeof hoverSortOrder == 'number') {
+        if (items && typeof dragSortOrder == 'number' && typeof hoverSortOrder == 'number' && dragIndex != overIndex) {
             let reordered = reorderByIndex<Item>(items, dragSortOrder, hoverSortOrder);
             onReorder?.(reordered);
         }
@@ -204,7 +208,7 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
                             onHitEnter={() => { onHitEnter(sortOrder + 1) }}
                             onEmptyDelete={() => { onEmptyDelete?.(id, prevFocusId) }}
 
-                            onDragStart={(e) => { handleDragStart(e, sortOrder) }}
+                            onDragStart={(e) => { handleDragStart(e, sortOrder, idx) }}
                             onDragEnd={handleDragEnd}
                             onDragOver={(e) => { handleDragOver(e, idx) }}
                             alignDropMenu={alignDropMenu}
@@ -215,9 +219,6 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
                 })
 
             }
-
-
-
         </div>
     )
 }

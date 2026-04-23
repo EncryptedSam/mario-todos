@@ -100,6 +100,8 @@ const TodoGroupsContainers = () => {
                 onClick={(id) => { navigate(`/group/${id}/`); }}
                 onHitEnter={(sortOrder) => { handleCreateGroup(sortOrder) }}
                 onEmptyDelete={handleDeleteItemOnEmpty}
+                onUp={(value) => { setFocusId(value) }}
+                onDown={(value) => { setFocusId(value) }}
             />
             <AddNewButton
                 type='group'

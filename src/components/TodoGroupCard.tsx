@@ -57,6 +57,7 @@ const TodoGroupCard = ({
     const [isEdit, setIsEdit] = useState<boolean>(false);
     const [readMore, setReadMore] = useState<boolean>(false);
     const backspaceCountRef = useRef(0);
+    const isTextAreaSelectedRef = useRef<boolean>(false);
 
     const autoResize = () => {
         const el = textareaRef.current;
@@ -83,14 +84,14 @@ const TodoGroupCard = ({
     useEffect(() => {
         if (isEdit && textareaRef.current) {
             const el = textareaRef.current;
-
-            el.focus();
-
+            
             const length = el.value.length;
-            if (length == 0) {
+            if (!isTextAreaSelectedRef.current) {
                 el.setSelectionRange(length, length);
+                isTextAreaSelectedRef.current = false;
             }
 
+            el.focus();
             autoResize();
         }
     }, [isEdit]);
@@ -192,6 +193,12 @@ const TodoGroupCard = ({
         }
     };
 
+    const handleTextAreaClick = (e: React.MouseEvent<HTMLTextAreaElement>) => {
+        e.stopPropagation();
+        setIsEdit(true);
+        isTextAreaSelectedRef.current = true;
+    }
+
 
     let percentage: number = ((completed / total) * 100);
 
@@ -227,10 +234,10 @@ const TodoGroupCard = ({
                         className={`flex-1 w-full resize-none overflow-hidden bg-transparent outline-none cursor-text`}
                         value={text}
                         onChange={(e) => handleChange(e.target.value)}
+                        onClick={handleTextAreaClick}
                         onKeyDown={handleKeyDown}
                         rows={1}
                         placeholder="Untitled"
-                        onClick={(e) => { e.stopPropagation(); setIsEdit(true) }}
                         readOnly={!isEdit}
                     />
                 }
