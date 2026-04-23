@@ -24,6 +24,7 @@ const TodoItemsContainers = () => {
     const [localVolume, setLocalVolume] = useState<number>(0);
     const [inputFocusId, setInputFocusId] = useState<number | null>(null);
     const [showConfetti, setShowConfetti] = useState<boolean>(true);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const [group, setGroup] = useState<TodoGroupWithStats>();
     const [items, setItems] = useState<TodoItem[]>([]);
@@ -62,6 +63,7 @@ const TodoItemsContainers = () => {
             await loadVolume();
             await loadGroup();
             await loadItems();
+            setIsLoading(false);
         })();
     }, []);
 
@@ -205,8 +207,11 @@ const TodoItemsContainers = () => {
                 onChangeText={(id, value) => { handleUpdateContent(id, value) }}
                 onClickCheck={(id, value) => { handleUpdateCompleted(id, value) }}
                 onHitEnter={(sortOrder) => { handleCreateItem(sortOrder) }}
-                onReorder={handleBulkReorder}
                 onEmptyDelete={handleDeleteItemOnEmpty}
+                onReorder={handleBulkReorder}
+                isEmpty={items.length == 0}
+                onCreateNew={() => { handleCreateItem() }}
+                isLoading={isLoading}
             />
             <AddNewButton
                 type='task'

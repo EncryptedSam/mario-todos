@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react'
 import TodoItemCard from './TodoItemCard'
 import reorderByIndex from '../utils/reorderByIndex';
+import createClone from '../utils/createClone';
+import { EmptyStateBackground } from './EmptyStateBackground';
 
 function move<T>(arr: T[], selectedIndex: number, movedToIndex: number): T[] {
     const result = [...arr];
@@ -11,31 +13,6 @@ function move<T>(arr: T[], selectedIndex: number, movedToIndex: number): T[] {
     return result;
 }
 
-function createClone(e: React.DragEvent): HTMLElement {
-    const target = e.currentTarget as HTMLElement;
-
-    const rect = target.getBoundingClientRect();
-
-    const clone = target.cloneNode(true) as HTMLElement;
-
-    clone.style.width = `${rect.width}px`;
-    clone.style.height = `${rect.height}px`;
-
-    clone.style.position = "fixed";
-    clone.style.top = "-9999px";
-    clone.style.left = "-9999px";
-
-    clone.style.borderRadius = "12px";
-    clone.style.overflow = "hidden";
-    clone.style.boxShadow = "0 8px 20px rgba(0,0,0,0.2)";
-    clone.style.boxSizing = "border-box";
-    clone.style.background = "rgba(243, 244, 246, 0.8)";
-
-    document.body.appendChild(clone);
-
-    e.dataTransfer.setDragImage(clone, rect.width / 2, rect.height / 2);
-    return clone;
-}
 
 type Item = { id: number, sortOrder: number, value: string, checked: boolean };
 
@@ -55,17 +32,23 @@ export interface Props {
     onHitEnter: (sortOrder: number) => void,
 
     onEmptyDelete?: (itemId: number, focusId?: number) => void;
+
+    isEmpty?: boolean;
+    onCreateNew?(): void;
+    isLoading?: boolean;
 }
 
 
-const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEnter, focusId, onReorder, onEmptyDelete }: Props) => {
+const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEnter, focusId, onReorder, onEmptyDelete, isEmpty, onCreateNew, isLoading }: Props) => {
     const [items, setItems] = useState<Props['data']>(data);
     const containerRef = useRef<HTMLDivElement | null>(null);
+
     const cloneRef = useRef<HTMLElement | null>(null);
     const [dragSortOrder, setDragSortOrder] = useState<number | null>(null);
+    const [hoverSortOrder, setHoverSortOrder] = useState<number | null>(null);
     const [dragIndex, setDragIndex] = useState<number | null>(null);
     const [overIndex, setOverIndex] = useState<number | null>(null);
-    const [hoverSortOrder, setHoverSortOrder] = useState<number | null>(null);
+
     const [focusState, setFocusState] = useState<{ id: number, key: number } | null>(null);
 
     const scrollSpeed = 10;
@@ -170,7 +153,7 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
     return (
         <div
             ref={containerRef}
-            className='flex-1 mt-2.5 space-y-2.5! min-h-0 scroll-hidden scroll-smooth overflow-auto'
+            className='relative flex-1 mt-2.5 space-y-2.5! min-h-0 scroll-hidden scroll-smooth overflow-auto'
         >
             {
                 items?.map(({ id, sortOrder, value, checked }, idx) => {
@@ -207,17 +190,26 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
                             onDelete={() => { onDelete(id) }}
                             onHitEnter={() => { onHitEnter(sortOrder + 1) }}
                             onEmptyDelete={() => { onEmptyDelete?.(id, prevFocusId) }}
-
-                            onDragStart={(e) => { handleDragStart(e, sortOrder, idx) }}
-                            onDragEnd={handleDragEnd}
-                            onDragOver={(e) => { handleDragOver(e, idx) }}
-                            alignDropMenu={alignDropMenu}
                             onUp={() => { handleOnUp(prevFocusId) }}
                             onDown={() => { handleOnDown(nextFocusId) }}
+
+                            alignDropMenu={alignDropMenu}
+
+                            onDragStart={(e) => { handleDragStart(e, sortOrder, idx) }}
+                            onDragOver={(e) => { handleDragOver(e, idx) }}
+                            onDragEnd={handleDragEnd}
+
                         />
                     )
                 })
 
+            }
+            {isEmpty &&
+                <EmptyStateBackground
+                    onClick={onCreateNew}
+                    type='task'
+                    isLoading={isLoading}
+                />
             }
         </div>
     )

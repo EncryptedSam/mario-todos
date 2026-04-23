@@ -6,6 +6,9 @@ interface Props {
     type?: 'progress' | 'step';
     onDelete?(): void;
     value: string;
+    hide?: boolean;
+
+
     onChange?(value: string): void;
     onClick?(): void;
 
@@ -38,6 +41,7 @@ const TodoGroupCard = ({
     onClick,
     total,
     completed,
+    hide,
     onDragStart,
     onDragOver,
     onDrop,
@@ -48,6 +52,7 @@ const TodoGroupCard = ({
     onUp,
     onDown,
     onHitEnter,
+
     focus
 }: Props) => {
     const [text, setText] = useState(value);
@@ -84,7 +89,7 @@ const TodoGroupCard = ({
     useEffect(() => {
         if (isEdit && textareaRef.current) {
             const el = textareaRef.current;
-            
+
             const length = el.value.length;
             if (!isTextAreaSelectedRef.current) {
                 el.setSelectionRange(length, length);
@@ -215,9 +220,10 @@ const TodoGroupCard = ({
         <div
             ref={containerRef}
             className={`
-                relative p-3 group rounded-2xl bg-gray-100 text-sm flex flex-col space-x-3! space-y-2! border border-gray-200 
-                ${!readonly && 'cursor-pointer'}
-            `}
+                relative rounded-2xl transition-none border
+                ${hide ? 'border border-gray-400 border-dashed bg-transparent' : 'bg-gray-100 border-gray-200'}
+                `
+            }
             onClick={onClick}
             onDragStart={onDragStart}
             onDragOver={onDragOver}
@@ -225,94 +231,104 @@ const TodoGroupCard = ({
             onDragEnter={onDragEnter}
             onDragLeave={onDragLeave}
             onDragEnd={onDragEnd}
+            draggable={!isEdit}
         >
+            <div
+                className={`
+                    relative p-3 group rounded-2xl text-sm space-x-3 space-y-2  cursor-pointer
+                    ${isEdit ? 'border-gray-400' : ''}
+                    ${hide ? 'opacity-0' : ''}
+                `}
+            >
 
-            <div className='flex w-full text-sm font-medium'>
-                {!readonly &&
-                    <textarea
-                        ref={textareaRef}
-                        className={`flex-1 w-full resize-none overflow-hidden bg-transparent outline-none cursor-text`}
-                        value={text}
-                        onChange={(e) => handleChange(e.target.value)}
-                        onClick={handleTextAreaClick}
-                        onKeyDown={handleKeyDown}
-                        rows={1}
-                        placeholder="Untitled"
-                        readOnly={!isEdit}
-                    />
-                }
-                {readonly &&
-                    <div className={`flex-1 overflow-hidden space-y-1`} >
-                        <p
-                            className={
-                                `
+                <div className='flex w-full text-sm font-medium'>
+                    {!readonly &&
+                        <textarea
+                            ref={textareaRef}
+                            className={`flex-1 w-full resize-none overflow-hidden bg-transparent outline-none cursor-text`}
+                            value={text}
+                            onChange={(e) => handleChange(e.target.value)}
+                            onClick={handleTextAreaClick}
+                            onKeyDown={handleKeyDown}
+                            rows={1}
+                            placeholder="Untitled"
+                            readOnly={!isEdit}
+                        />
+                    }
+                    {readonly &&
+                        <div className={`flex-1 overflow-hidden space-y-1`} >
+                            <p
+                                className={
+                                    `
                                 w-full cursor-pointer ${!readMore ? 'overflow-hidden text-nowrap text-ellipsis' : ''}
                                 ${text.length == 0 ? 'text-gray-400' : ''}
                                 `
+                                }
+                                onClick={() => { setReadMore(true) }}
+                            >{text ? text : 'Untitled'}</p>
+                            {readMore &&
+                                <button
+                                    className='text-gray-700 cursor-pointer'
+                                    onClick={() => { setReadMore(false) }}
+                                >show less</button>
                             }
-                            onClick={() => { setReadMore(true) }}
-                        >{text ? text : 'Untitled'}</p>
-                        {readMore &&
-                            <button
-                                className='text-gray-700 cursor-pointer'
-                                onClick={() => { setReadMore(false) }}
-                            >show less</button>
-                        }
-                    </div>
-                }
-                {!readonly &&
-                    <button
-                        className={`
+                        </div>
+                    }
+                    {!readonly &&
+                        <button
+                            className={`
                             inline-flex text-red-700 hover:text-red-800 text-sm items-center justify-center shrink-0 grow-0 w-5 h-5 cursor-pointer opacity-70 hover:opacity-100
                             `
-                        }
-                        onClick={(e) => { e.stopPropagation(); onDelete?.() }}
-                    >
-                        <BsTrash />
-                    </button>
-                }
-                {readonly &&
-                    <span className='inline-flex shrink-0 items-end w-10 justify-end'>
-                        {percentage.toFixed(0)}%
-                    </span>
-                }
-            </div>
+                            }
+                            onClick={(e) => { e.stopPropagation(); onDelete?.() }}
+                        >
+                            <BsTrash />
+                        </button>
+                    }
+                    {readonly &&
+                        <span className='inline-flex shrink-0 items-end w-10 justify-end'>
+                            {percentage.toFixed(0)}%
+                        </span>
+                    }
+                </div>
 
-            <div className="relative w-full h-2 rounded-full overflow-hidden">
-                {progressType == 'progress' &&
-                    <div className='w-full h-full bg-gray-300' >
-                        <div
-                            className="absolute h-full bg-red-500 transition-all duration-300 rounded-full"
-                            style={{ width: `${percentage ?? 30}%` }}
-                        />
-                    </div>
-                }
-                {progressType == 'step' &&
-                    <div className='absolute space-x-1 top-0 left-0 flex w-full h-full items-center justify-between' >
-                        {
-                            dots.map((_, idx) => {
-                                return (
-                                    <span
-                                        key={`${idx}`}
-                                        className={`
+                <div className="relative w-full h-2 rounded-full overflow-hidden">
+                    {progressType == 'progress' &&
+                        <div className='w-full h-full bg-gray-300' >
+                            <div
+                                className="absolute h-full bg-red-500 transition-all duration-300 rounded-full"
+                                style={{ width: `${percentage ?? 30}%` }}
+                            />
+                        </div>
+                    }
+                    {progressType == 'step' &&
+                        <div className='absolute space-x-1 top-0 left-0 flex w-full h-full items-center justify-between' >
+                            {
+                                dots.map((_, idx) => {
+                                    return (
+                                        <span
+                                            key={`${idx}`}
+                                            className={`
                                         flex-1 w-2 h-full rounded-full
                                         ${idx < completed ? 'bg-red-500' : 'bg-gray-300 '}
                                         `
-                                        }
-                                    />
-                                )
-                            })
-                        }
+                                            }
+                                        />
+                                    )
+                                })
+                            }
+                        </div>
+                    }
+                </div>
+                {!readonly &&
+                    <div className='text-[13px] flex justify-between text-gray-700 font-normal' >
+                        <div>{completed}/{total} tasks completed</div>
+                        <span>{percentage.toFixed(0)}%</span>
                     </div>
                 }
             </div>
-            {!readonly &&
-                <div className='text-[13px] flex justify-between text-gray-700 font-normal' >
-                    <div>{completed}/{total} tasks completed</div>
-                    <span>{percentage.toFixed(0)}%</span>
-                </div>
-            }
         </div>
+
     );
 };
 

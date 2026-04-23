@@ -1,6 +1,6 @@
 import React from 'react'
 import { AiOutlineContainer } from 'react-icons/ai'
-import { MdOutlineAddTask } from 'react-icons/md'
+import { FaRegListAlt } from 'react-icons/fa'
 
 interface Props {
     type?: 'task' | 'group'
@@ -24,7 +24,7 @@ const AddNewButton = ({ type, onClick, className }: Props) => {
                 {type == 'task' &&
                     <>
                         <span>Create New Task</span>
-                        <MdOutlineAddTask className='text-[16px]' />
+                        <FaRegListAlt className='text-[16px]' />
                     </>
                 }
             </button>

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import NavBar from '../components/NavBar'
 import AddNewButton from '../components/AddNewButton'
-import { createGroup, getGroupsWithStats, updateGroup, deleteGroup } from '../services/todoGroup.service'
+import { createGroup, getGroupsWithStats, updateGroup, deleteGroup, bulkUpdateGroupOrder } from '../services/todoGroup.service'
 import type { TodoGroupWithStats } from '../db/schema'
 import { useNavigate } from 'react-router-dom'
 import { getVolume, setVolume } from '../services/settings.service'
@@ -15,6 +15,7 @@ const TodoGroupsContainers = () => {
     const [localVolume, setLocalVolume] = useState<number>(0);
     const [groups, setGroups] = useState<TodoGroupWithStats[]>([]);
     const [focusId, setFocusId] = useState<number | undefined>(undefined);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
     const navigate = useNavigate();
 
     useEscape(() => {
@@ -32,8 +33,11 @@ const TodoGroupsContainers = () => {
     }
 
     useEffect(() => {
-        loadRows();
-        loadVolume();
+        (async () => {
+            await loadRows();
+            await loadVolume();
+            setIsLoading(false);
+        })()
     }, [])
 
     const handleCreateGroup = async (sortOrder?: number) => {
@@ -73,6 +77,11 @@ const TodoGroupsContainers = () => {
         }
     }
 
+    const handleBulkReorder = async (items: { id: number; sortOrder: number }[]) => {
+        await bulkUpdateGroupOrder(items);
+        await loadRows();
+    }
+
     const filteredGroups: TodoGroupWithStats[] = useMemo(() => {
         return groups
             .filter(({ completed }) => {
@@ -102,6 +111,10 @@ const TodoGroupsContainers = () => {
                 onEmptyDelete={handleDeleteItemOnEmpty}
                 onUp={(value) => { setFocusId(value) }}
                 onDown={(value) => { setFocusId(value) }}
+                onReorder={handleBulkReorder}
+                isEmpty={groups.length == 0}
+                onCreateNew={() => { handleCreateGroup() }}
+                isLoading={isLoading}
             />
             <AddNewButton
                 type='group'
