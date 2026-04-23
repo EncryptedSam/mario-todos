@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, forwardRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import coinSound from "../assets/sounds/mario_coin_sound.mp3";
 import { MdDeleteOutline, MdOutlineEdit } from 'react-icons/md';
 import useEscape from '../hooks/useEscape';

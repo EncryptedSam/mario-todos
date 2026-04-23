@@ -75,26 +75,9 @@ const TodoGroupCard = ({
         autoResize();
     }, [value]);
 
-    const handleChange = (val: string) => {
-        setText(val);
-        autoResize();
-
-        clearTimeout(timeoutRef.current);
-
-        timeoutRef.current = setTimeout(() => {
-            onChange?.(val);
-        }, DEBOUNCE_DELAY);
-    };
-
-    const handleClick = () => {
-        onClick?.();
-    }
-
 
     useEffect(() => {
-        if (focus) {
-            setIsEdit(true);
-        }
+        setIsEdit(focus ? focus : false);
     }, [focus]);
 
     useEffect(() => {
@@ -128,6 +111,17 @@ const TodoGroupCard = ({
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
+
+    const handleChange = (val: string) => {
+        setText(val);
+        autoResize();
+
+        clearTimeout(timeoutRef.current);
+
+        timeoutRef.current = setTimeout(() => {
+            onChange?.(val);
+        }, DEBOUNCE_DELAY);
+    };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         const el = textareaRef.current;
@@ -217,7 +211,7 @@ const TodoGroupCard = ({
                 relative p-3 group rounded-2xl bg-gray-100 text-sm flex flex-col space-x-3! space-y-2! border border-gray-200 
                 ${!readonly && 'cursor-pointer'}
             `}
-            onClick={handleClick}
+            onClick={onClick}
             onDragStart={onDragStart}
             onDragOver={onDragOver}
             onDrop={onDrop}

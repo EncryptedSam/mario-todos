@@ -33,7 +33,6 @@ export const createGroup = async (title: string, sortOrder?: number) => {
       }
     }
 
-    // ✅ return this
     return db.todoGroups.add({
       title,
       sortOrder: newOrder,
