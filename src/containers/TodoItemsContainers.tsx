@@ -173,14 +173,14 @@ const TodoItemsContainers = () => {
     return (
         <>
             <NavBar
-
                 onChangeFilter={setFilter}
-
+                
                 volumeSlider={{
                     value: localVolume,
                     onChange: (value) => { handleVolume(value) }
                 }}
-
+                
+                volumeValue={(localVolume / 100) * 1}
                 onClickBack={() => { navigate(`/`); }}
 
                 confettiValue={showConfetti}

@@ -11,7 +11,7 @@ import useEscape from '../hooks/useEscape'
 
 const TodoGroupsContainers = () => {
     const [filter, setFilter] = useState<string>('all');
-    const [deleteId, setDeleteId] = useState<number | null>(null);
+    const [deleteId, setDeleteId] = useState<number | undefined>(undefined);
     const [localVolume, setLocalVolume] = useState<number>(0);
     const [groups, setGroups] = useState<TodoGroupWithStats[]>([]);
     const [focusId, setFocusId] = useState<number | undefined>(undefined);
@@ -20,7 +20,7 @@ const TodoGroupsContainers = () => {
     const navigate = useNavigate();
 
     useEscape(() => {
-        setDeleteId(null);
+        setDeleteId(undefined);
         setFocusId(undefined);
     });
 
@@ -64,7 +64,7 @@ const TodoGroupsContainers = () => {
         if (typeof deleteId == 'number') {
             await deleteGroup(deleteId);
             await loadRows();
-            setDeleteId(null)
+            setDeleteId(undefined)
         }
     }
 
@@ -76,7 +76,7 @@ const TodoGroupsContainers = () => {
     const handleDeleteItemOnEmpty = async (id: number, focusId?: number) => {
         await deleteGroup(id);
         await loadRows();
-        setDeleteId(null)
+        setDeleteId(undefined)
         if (typeof focusId == 'number') {
             setFocusId(focusId);
         }
@@ -99,7 +99,6 @@ const TodoGroupsContainers = () => {
     return (
         < >
             <NavBar
-
                 onChangeFilter={setFilter}
                 volumeSlider={{
                     value: localVolume,
@@ -109,7 +108,7 @@ const TodoGroupsContainers = () => {
             <TodoGroups
                 data={filteredGroups}
                 onChange={(id, value) => { handleCardChange(Number(id), value) }}
-                onDelete={(id) => { setFocusId(undefined); setDeleteId(Number(id)) }}
+                onDelete={(id) => { setDeleteId(Number(id)) }}
                 onClick={(id) => { navigate(`/group/${id}/`); }}
                 onHitEnter={(sortOrder) => { handleCreateGroup(sortOrder) }}
                 onEmptyDelete={handleDeleteItemOnEmpty}
@@ -119,9 +118,9 @@ const TodoGroupsContainers = () => {
                 isEmpty={groups.length == 0}
                 onCreateNew={() => { handleCreateGroup() }}
                 isLoading={isLoading}
+                deleteId={deleteId}
 
-
-                focusId={focusId}
+                focusId={typeof deleteId == 'number' ? undefined : focusId}
                 onClickFocus={(id) => { setFocusId(id) }}
                 onClearFocus={(id) => { id == focusId && setFocusId(undefined); }}
             />
@@ -132,7 +131,7 @@ const TodoGroupsContainers = () => {
             {
                 deleteId &&
                 <DeleteAlertModal
-                    onCancel={() => { setDeleteId(null) }}
+                    onCancel={() => { setDeleteId(undefined) }}
                     onDelete={handleDeleteGroup}
                     placeholder='Group'
                 />

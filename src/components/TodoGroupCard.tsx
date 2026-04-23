@@ -19,6 +19,7 @@ interface Props {
     onDown?(): void;
 
     focus?: boolean;
+    isDeleting?: boolean;
     readonly?: boolean;
     total: number;
     completed: number;
@@ -54,6 +55,7 @@ const TodoGroupCard = ({
     onDown,
     onHitEnter,
     focus,
+    isDeleting,
     onClickFocus,
     onClearFocus
 }: Props) => {
@@ -235,6 +237,7 @@ const TodoGroupCard = ({
                 relative rounded-2xl transition-none border
                 ${hide ? 'border border-gray-400 border-dashed bg-transparent' : 'bg-gray-100 border-gray-200'}
                 ${isEdit ? 'border-gray-400' : ''}
+                ${isDeleting ? 'border-red-600' : ''}
                 `
             }
             onClick={onClick}
@@ -260,9 +263,9 @@ const TodoGroupCard = ({
                             className={`flex-1 w-full resize-none overflow-hidden bg-transparent outline-none cursor-text`}
                             value={text}
                             onChange={(e) => handleChange(e.target.value)}
-                            onClick={handleTextAreaClick}
                             onKeyDown={handleKeyDown}
                             rows={1}
+                            onClick={handleTextAreaClick}
                             placeholder="Untitled"
                         />
                     }

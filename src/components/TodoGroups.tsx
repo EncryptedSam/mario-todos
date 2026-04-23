@@ -19,6 +19,7 @@ function move<T>(arr: T[], selectedIndex: number, movedToIndex: number): T[] {
 interface Props {
     data?: TodoGroupWithStats[];
 
+    deleteId?: number;
     focusId?: number;
     onChange?(groupId: number, value: string): void;
     onDelete?(groupId: number): void;
@@ -38,7 +39,7 @@ interface Props {
     isLoading?: boolean;
 }
 
-const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDelete, focusId, onUp, onDown, onReorder, isEmpty, onCreateNew, isLoading, onClickFocus, onClearFocus }: Props) => {
+const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDelete, focusId, deleteId, onUp, onDown, onReorder, isEmpty, onCreateNew, isLoading, onClickFocus, onClearFocus }: Props) => {
     const [groups, setGroups] = useState(data);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const cloneRef = useRef<HTMLElement | null>(null);
@@ -169,6 +170,7 @@ const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDele
                             completed={completed}
                             total={total}
                             focus={focusId == id}
+                            isDeleting={deleteId == id}
                             hide={sortOrder == dragSortOrder}
 
                             onEmptyDelete={() => { onEmptyDelete?.(Number(id), prevFocusId) }}
