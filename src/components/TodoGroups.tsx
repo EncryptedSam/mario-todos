@@ -31,12 +31,14 @@ interface Props {
     onEmptyDelete?: (itemId: number, focusId?: number) => void;
     onUp?: (focusGroupId?: number) => void;
     onDown?: (focusGroupId?: number) => void;
+    onClickFocus?: (groupId: number) => void;
+    onClearFocus?: (groupId: number) => void;
 
     isEmpty?: boolean;
     isLoading?: boolean;
 }
 
-const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDelete, focusId, onUp, onDown, onReorder, isEmpty, onCreateNew, isLoading }: Props) => {
+const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDelete, focusId, onUp, onDown, onReorder, isEmpty, onCreateNew, isLoading, onClickFocus, onClearFocus }: Props) => {
     const [groups, setGroups] = useState(data);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const cloneRef = useRef<HTMLElement | null>(null);
@@ -173,10 +175,12 @@ const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDele
                             onChange={(value) => { onChange?.(Number(id), value) }}
                             onDelete={() => { onDelete?.(Number(id)) }}
                             onClick={() => { onClick?.(Number(id)) }}
-                            onHitEnter={() => { onHitEnter(sortOrder + 1) }}
 
+                            onHitEnter={() => { onHitEnter(sortOrder + 1) }}
                             onUp={() => { onUp?.(prevFocusId) }}
                             onDown={() => { onDown?.(nextFocusId) }}
+                            onClickFocus={() => { onClickFocus?.(Number(id)) }}
+                            onClearFocus={() => { onClearFocus?.(Number(id)) }}
 
                             onDragStart={(e) => { handleDragStart(e, sortOrder, idx) }}
                             onDragOver={(e) => { handleDragOver(e, idx) }}

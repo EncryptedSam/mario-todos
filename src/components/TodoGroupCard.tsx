@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { BsTrash } from 'react-icons/bs';
-import useEscape from '../hooks/useEscape';
 
 interface Props {
     type?: 'progress' | 'step';
@@ -12,6 +11,8 @@ interface Props {
     onChange?(value: string): void;
     onClick?(): void;
 
+    onClickFocus?(): void;
+    onClearFocus?(): void;
     onHitEnter?(): void;
     onEmptyDelete?(): void;
     onUp?(): void;
@@ -52,8 +53,9 @@ const TodoGroupCard = ({
     onUp,
     onDown,
     onHitEnter,
-
-    focus
+    focus,
+    onClickFocus,
+    onClearFocus
 }: Props) => {
     const [text, setText] = useState(value);
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -72,9 +74,12 @@ const TodoGroupCard = ({
         el.style.height = el.scrollHeight + "px";
     };
 
-    useEscape(() => {
-        setIsEdit(false);
-    });
+    const blurTextArea = () => {
+        if (textareaRef.current) {
+            const el = textareaRef.current;
+            el.blur();
+        }
+    }
 
     useEffect(() => {
         setText(value);
@@ -84,6 +89,9 @@ const TodoGroupCard = ({
 
     useEffect(() => {
         setIsEdit(focus ? focus : false);
+        if (!focus) {
+            blurTextArea();
+        }
     }, [focus]);
 
     useEffect(() => {
@@ -93,10 +101,10 @@ const TodoGroupCard = ({
             const length = el.value.length;
             if (!isTextAreaSelectedRef.current) {
                 el.setSelectionRange(length, length);
-                isTextAreaSelectedRef.current = false;
             }
-
             el.focus();
+            isTextAreaSelectedRef.current = false;
+
             autoResize();
         }
     }, [isEdit]);
@@ -107,7 +115,11 @@ const TodoGroupCard = ({
                 containerRef.current &&
                 !containerRef.current.contains(e.target as Node)
             ) {
-                setIsEdit(false);
+                if (isEdit) {
+                    console.log(isEdit);
+                    blurTextArea();
+                    onClearFocus?.();
+                }
             }
         };
 
@@ -116,7 +128,7 @@ const TodoGroupCard = ({
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, []);
+    }, [isEdit]);
 
     const handleChange = (val: string) => {
         setText(val);
@@ -200,8 +212,8 @@ const TodoGroupCard = ({
 
     const handleTextAreaClick = (e: React.MouseEvent<HTMLTextAreaElement>) => {
         e.stopPropagation();
-        setIsEdit(true);
         isTextAreaSelectedRef.current = true;
+        onClickFocus?.();
     }
 
 
@@ -222,6 +234,7 @@ const TodoGroupCard = ({
             className={`
                 relative rounded-2xl transition-none border
                 ${hide ? 'border border-gray-400 border-dashed bg-transparent' : 'bg-gray-100 border-gray-200'}
+                ${isEdit ? 'border-gray-400' : ''}
                 `
             }
             onClick={onClick}
@@ -236,7 +249,6 @@ const TodoGroupCard = ({
             <div
                 className={`
                     relative p-3 group rounded-2xl text-sm space-x-3 space-y-2  cursor-pointer
-                    ${isEdit ? 'border-gray-400' : ''}
                     ${hide ? 'opacity-0' : ''}
                 `}
             >
@@ -252,7 +264,6 @@ const TodoGroupCard = ({
                             onKeyDown={handleKeyDown}
                             rows={1}
                             placeholder="Untitled"
-                            readOnly={!isEdit}
                         />
                     }
                     {readonly &&

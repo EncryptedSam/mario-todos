@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import NavBar from '../components/NavBar'
 import AddNewButton from '../components/AddNewButton'
 import { createGroup, getGroupsWithStats, updateGroup, deleteGroup, bulkUpdateGroupOrder } from '../services/todoGroup.service'
@@ -16,10 +16,12 @@ const TodoGroupsContainers = () => {
     const [groups, setGroups] = useState<TodoGroupWithStats[]>([]);
     const [focusId, setFocusId] = useState<number | undefined>(undefined);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const isCreatingRef = useRef<boolean>(false);
     const navigate = useNavigate();
 
     useEscape(() => {
         setDeleteId(null);
+        setFocusId(undefined);
     });
 
     const loadRows = async () => {
@@ -42,11 +44,14 @@ const TodoGroupsContainers = () => {
 
     const handleCreateGroup = async (sortOrder?: number) => {
         setFilter('all');
-
-        const id = await createGroup('', sortOrder);
-        await loadRows();
-        if (typeof id == 'number') {
-            setFocusId(id);
+        if (isCreatingRef.current == false) {
+            isCreatingRef.current = true;
+            const id = await createGroup('', sortOrder);
+            await loadRows();
+            if (typeof id == 'number') {
+                setFocusId(id);
+            }
+            isCreatingRef.current = false;
         }
     }
 
@@ -103,9 +108,8 @@ const TodoGroupsContainers = () => {
             />
             <TodoGroups
                 data={filteredGroups}
-                focusId={focusId}
                 onChange={(id, value) => { handleCardChange(Number(id), value) }}
-                onDelete={(id) => { setDeleteId(Number(id)) }}
+                onDelete={(id) => { setFocusId(undefined); setDeleteId(Number(id)) }}
                 onClick={(id) => { navigate(`/group/${id}/`); }}
                 onHitEnter={(sortOrder) => { handleCreateGroup(sortOrder) }}
                 onEmptyDelete={handleDeleteItemOnEmpty}
@@ -115,6 +119,11 @@ const TodoGroupsContainers = () => {
                 isEmpty={groups.length == 0}
                 onCreateNew={() => { handleCreateGroup() }}
                 isLoading={isLoading}
+
+
+                focusId={focusId}
+                onClickFocus={(id) => { setFocusId(id) }}
+                onClearFocus={(id) => { id == focusId && setFocusId(undefined); }}
             />
             <AddNewButton
                 type='group'

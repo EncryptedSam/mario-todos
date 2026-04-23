@@ -234,7 +234,6 @@ const TodoItemCard = ({
             className={`
                 relative rounded-2xl transition-none
                 ${hide ? 'border border-gray-400 border-dashed bg-transparent' : 'bg-gray-100'}
-
                 `
             }
             onDragStart={onDragStart}
