@@ -3,6 +3,7 @@ import TodoItemCard from './TodoItemCard'
 import reorderByIndex from '../utils/reorderByIndex';
 import createClone from '../utils/createClone';
 import { EmptyStateBackground } from './EmptyStateBackground';
+import ReorderingOverlay from './ReorderingOverlay';
 
 function move<T>(arr: T[], selectedIndex: number, movedToIndex: number): T[] {
     const result = [...arr];
@@ -25,7 +26,7 @@ export interface Props {
     volume: number;
     onReorder?(args: { id: number, sortOrder: number }[]): void;
 
-    onDelete: (itemId: number, focusId?: number) => void,
+    onDelete?: (itemId: number, focusId?: number) => void,
     onChangeText: (itemId: number, value: string) => void,
 
     onClickCheck: (itemId: number, value: boolean) => void,
@@ -41,10 +42,11 @@ export interface Props {
     isEmpty?: boolean;
     onCreateNew?(): void;
     isLoading?: boolean;
+    isReordering?: boolean;
 }
 
 
-const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEnter, focusId, onReorder, onEmptyDelete, isEmpty, onCreateNew, isLoading, deleteId, onUp, onDown, onClickFocus, onClearFocus }: Props) => {
+const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEnter, focusId, onReorder, onEmptyDelete, isEmpty, onCreateNew, isLoading, deleteId, onUp, onDown, onClickFocus, onClearFocus, isReordering }: Props) => {
     const [items, setItems] = useState<Props['data']>(data);
     const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -191,7 +193,7 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
                             onChangeText={(value) => { onChangeText(id, value) }}
                             onClickCheck={(value) => { onClickCheck(id, value) }}
                             onHitEnter={() => { onHitEnter(sortOrder + 1) }}
-                            onDelete={() => { onDelete(id, deleteFocusId) }}
+                            onDelete={() => { onDelete?.(id, deleteFocusId) }}
                             onUp={() => { onUp?.(prevFocusId) }}
                             onDown={() => { onDown?.(nextFocusId) }}
 
@@ -213,6 +215,9 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
                     type='task'
                     isLoading={isLoading}
                 />
+            }
+            {isReordering &&
+                <ReorderingOverlay />
             }
         </div>
     )

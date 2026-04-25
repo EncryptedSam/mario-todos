@@ -4,6 +4,7 @@ import type { TodoGroupWithStats } from '../db/schema';
 import createClone from '../utils/createClone';
 import reorderByIndex from '../utils/reorderByIndex';
 import { EmptyStateBackground } from './EmptyStateBackground';
+import ReorderingOverlay from './ReorderingOverlay';
 
 function move<T>(arr: T[], selectedIndex: number, movedToIndex: number): T[] {
     const result = [...arr];
@@ -20,7 +21,7 @@ interface Props {
     deleteId?: number;
     focusId?: number;
     onChange?(groupId: number, value: string): void;
-    onDelete?(groupId: number): void;
+    onDelete?: (groupId: number, focusId?: number) => void,
     onClick?(groupId: number): void;
 
     onReorder?(args: { id: number, sortOrder: number }[]): void;
@@ -35,9 +36,10 @@ interface Props {
 
     isEmpty?: boolean;
     isLoading?: boolean;
+    isReordering?: boolean;
 }
 
-const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDelete, focusId, deleteId, onUp, onDown, onReorder, isEmpty, onCreateNew, isLoading, onClickFocus, onClearFocus }: Props) => {
+const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDelete, focusId, deleteId, onUp, onDown, onReorder, isEmpty, onCreateNew, isLoading, onClickFocus, onClearFocus, isReordering }: Props) => {
     const [groups, setGroups] = useState(data);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const cloneRef = useRef<HTMLElement | null>(null);
@@ -146,6 +148,7 @@ const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDele
 
                     let prevFocusId: number | undefined;
                     let nextFocusId: number | undefined;
+                    let deleteFocusId: number | undefined;
 
                     if (groups.length > 0) {
                         if (idx > 0) {
@@ -161,6 +164,14 @@ const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDele
                         }
                     }
 
+                    if (groups.length > 1) {
+                        if (idx < groups.length - 1) {
+                            deleteFocusId = groups[idx + 1].id;
+                        } else {
+                            deleteFocusId = groups[idx - 1].id;
+                        }
+                    }
+
                     return (
                         <TodoGroupCard
                             key={`todo_group_${id}_${sortOrder}`}
@@ -173,10 +184,10 @@ const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDele
 
                             onEmptyDelete={() => { onEmptyDelete?.(Number(id), prevFocusId) }}
                             onChange={(value) => { onChange?.(Number(id), value) }}
-                            onDelete={() => { onDelete?.(Number(id)) }}
+                            onDelete={() => { onDelete?.(Number(id), deleteFocusId) }}
                             onClick={() => { onClick?.(Number(id)) }}
 
-                            onCtrolEnter={() => { onClick?.(Number(id))  }}
+                            onCtrolEnter={() => { onClick?.(Number(id)) }}
                             onHitEnter={() => { onHitEnter(sortOrder + 1) }}
                             onUp={() => { onUp?.(prevFocusId) }}
                             onDown={() => { onDown?.(nextFocusId) }}
@@ -196,6 +207,9 @@ const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDele
                     type='group'
                     isLoading={isLoading}
                 />
+            }
+            {isReordering &&
+                <ReorderingOverlay />
             }
         </div>
     )

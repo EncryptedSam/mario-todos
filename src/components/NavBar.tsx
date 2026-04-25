@@ -22,30 +22,50 @@ interface Props {
 
 const NavBar = ({ volumeSlider, onChangeFilter, onClickBack, confettiValue, onClickConfetti, showConfetti, volumeValue, onClickHotKeys }: Props) => {
     const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
-    const audioRef = useRef<HTMLAudioElement | null>(new Audio(wonSound));
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+    const [canPlayAudio, setCanPlayAudio] = useState(false);
 
+
+    // create audio once
     useEffect(() => {
+        audioRef.current = new Audio(wonSound);
+    }, []);
 
-        if (audioRef.current) {
+    // unlock audio on first user interaction
+    useEffect(() => {
+        const unlock = () => {
             const audio = audioRef.current;
-
-            if (showConfetti) {
-                audio.currentTime = 0;
-                audio.play();
-            } else {
-                audio.pause();
-                audio.currentTime = 0;
+            if (audio) {
+                audio.play()
+                    .then(() => {
+                        audio.pause();
+                        audio.currentTime = 0;
+                        setCanPlayAudio(true);
+                    })
+                    .catch(() => { });
             }
-        }
 
-        return () => {
-            if (audioRef.current) {
-                const audio = audioRef.current;
-                audio.pause();
-                audio.currentTime = 0;
-            }
+            window.removeEventListener("click", unlock);
+        };
+
+        window.addEventListener("click", unlock);
+
+        return () => window.removeEventListener("click", unlock);
+    }, []);
+
+    // play when confetti shows
+    useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio) return;
+
+        if (showConfetti && canPlayAudio) {
+            audio.currentTime = 0;
+            audio.play().catch(() => { });
+        } else {
+            audio.pause();
+            audio.currentTime = 0;
         }
-    }, [showConfetti]);
+    }, [showConfetti, canPlayAudio]);
 
     useEffect(() => {
         if (audioRef.current) {

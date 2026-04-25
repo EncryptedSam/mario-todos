@@ -11,6 +11,7 @@ import useEscape from '../hooks/useEscape'
 import NewlineToast from '../components/NewlineToast'
 import KeybindingTableModal from '../components/KeybindingTableModal'
 import ReactConfetti from 'react-confetti'
+import useConfirmResolver from '../hooks/useConfirmResolver'
 
 const areAllGroupsCompleted = (groups: TodoGroupWithStats[]) => {
     return groups.every(group => {
@@ -30,6 +31,8 @@ const TodoGroupsContainers = () => {
     const [showNewLineToast, setShowNewLineToast] = useState<boolean>(false);
     const [showHotKeys, setShowHotKeys] = useState<boolean>(false);
     const isCreatingRef = useRef<boolean>(false);
+    const isReorderingRef = useRef<boolean>(false);
+    const { onConfirm, onCancel, confirm } = useConfirmResolver();
     const navigate = useNavigate();
 
     useEscape(() => {
@@ -73,12 +76,16 @@ const TodoGroupsContainers = () => {
         await loadRows();
     }
 
-    const handleDeleteGroup = async () => {
-        if (typeof deleteId == 'number') {
-            await deleteGroup(deleteId);
+    const handleDeleteGroup = async (groupId: number, focusId?: number) => {
+        setDeleteId(groupId);
+        let ok = await confirm();
+
+        if (ok) {
+            await deleteGroup(groupId);
             await loadRows();
-            setDeleteId(undefined)
+            setFocusId(focusId);
         }
+        setDeleteId(undefined)
     }
 
     const handleVolume = async (value: number) => {
@@ -96,8 +103,14 @@ const TodoGroupsContainers = () => {
     }
 
     const handleBulkReorder = async (items: { id: number; sortOrder: number }[]) => {
-        await bulkUpdateGroupOrder(items);
-        await loadRows();
+
+        if (isReorderingRef.current == false) {
+            isReorderingRef.current = true;
+            await bulkUpdateGroupOrder(items);
+            await loadRows();
+            isReorderingRef.current = false;
+        }
+
     }
 
     const handleConfetti = async () => {
@@ -135,7 +148,7 @@ const TodoGroupsContainers = () => {
             <TodoGroups
                 data={filteredGroups}
                 onChange={(id, value) => { handleCardChange(Number(id), value) }}
-                onDelete={(id) => { setDeleteId(Number(id)) }}
+                onDelete={(id, focusId) => { handleDeleteGroup(id, focusId) }}
                 onClick={(id) => { navigate(`/group/${id}/`); }}
                 onHitEnter={(sortOrder) => { setShowNewLineToast(true); handleCreateGroup(sortOrder) }}
                 onEmptyDelete={handleDeleteItemOnEmpty}
@@ -146,6 +159,7 @@ const TodoGroupsContainers = () => {
                 onCreateNew={() => { handleCreateGroup() }}
                 isLoading={isLoading}
                 deleteId={deleteId}
+                isReordering={isReorderingRef.current}
 
                 focusId={typeof deleteId == 'number' ? undefined : focusId}
                 onClickFocus={(id) => { setFocusId(id) }}
@@ -158,8 +172,8 @@ const TodoGroupsContainers = () => {
             {
                 deleteId &&
                 <DeleteAlertModal
-                    onCancel={() => { setDeleteId(undefined) }}
-                    onDelete={handleDeleteGroup}
+                    onCancel={onCancel}
+                    onDelete={onConfirm}
                     placeholder='Group'
                 />
             }
@@ -168,7 +182,7 @@ const TodoGroupsContainers = () => {
                 <NewlineToast onClose={() => { setShowNewLineToast(false) }} />
             }
             {
-                (showConfetti && allGroupsCompleted) &&
+                (showConfetti && allGroupsCompleted && groups.length > 0) &&
                 <ReactConfetti
                     className='h-full m-auto'
                     recycle={true}

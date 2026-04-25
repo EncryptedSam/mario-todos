@@ -14,29 +14,8 @@ import TodoItems, { type Props as TodoItemsProps } from '../components/TodoItems
 import useEscape from '../hooks/useEscape'
 import KeybindingTableModal from '../components/KeybindingTableModal'
 import NewlineToast from '../components/NewlineToast'
+import useConfirmResolver from '../hooks/useConfirmResolver'
 
-
-function useConfirmResolver() {
-    const [resolver, setResolver] = useState<((value: boolean) => void) | null>(null);
-
-    const confirm = () => {
-        return new Promise<boolean>((resolve) => {
-            setResolver(() => resolve);
-        });
-    };
-
-    const onConfirm = () => {
-        resolver?.(true);
-        setResolver(null);
-    };
-
-    const onCancel = () => {
-        resolver?.(false);
-        setResolver(null);
-    };
-
-    return { confirm, onConfirm, onCancel };
-}
 
 
 
@@ -58,7 +37,7 @@ const TodoItemsContainers = () => {
     const [items, setItems] = useState<TodoItem[]>([]);
 
     const { onConfirm, onCancel, confirm } = useConfirmResolver();
-
+    const isReorderingRef = useRef<boolean>(false);
     const isCreatingRef = useRef<boolean>(false);
 
     useEscape(() => {
@@ -66,6 +45,21 @@ const TodoItemsContainers = () => {
         setFocusId(undefined);
     });
 
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Backspace") {
+                if (!focusId) {
+                    navigate(`/`);
+                }
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [focusId]);
 
     const loadConfetti = async () => {
         const confetti = await getConfetti();
@@ -131,21 +125,23 @@ const TodoItemsContainers = () => {
     }
 
     const handleBulkReorder = async (items: { id: number; sortOrder: number }[]) => {
-        await bulkUpdateItemOrder(items);
-        await loadItems();
+        if (isReorderingRef.current == false) {
+            isReorderingRef.current = true;
+            await bulkUpdateItemOrder(items);
+            await loadItems();
+            isReorderingRef.current = false;
+        }
     }
 
     const handleDeleteItem = async (itemId: number, focusId?: number) => {
 
         setDeleteId(itemId);
         const ok = await confirm();
-        if (ok && typeof itemId == 'number') {
+        if (ok) {
             await deleteItem(itemId);
             await loadItems();
             await loadGroup();
-            if (typeof focusId == 'number') {
-                setFocusId(focusId);
-            }
+            setFocusId(focusId);
         }
         setDeleteId(undefined)
     }
@@ -248,7 +244,7 @@ const TodoItemsContainers = () => {
                 isEmpty={items.length == 0}
                 onCreateNew={() => { handleCreateItem() }}
                 isLoading={isLoading}
-
+                isReordering={isReorderingRef.current}
                 onUp={(value) => { setFocusId(value) }}
                 onDown={(value) => { setFocusId(value) }}
                 deleteId={deleteId}
