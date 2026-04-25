@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import coinSound from "../assets/sounds/mario_coin_sound.mp3";
-import { MdDeleteOutline, MdOutlineEdit } from 'react-icons/md';
 import useEscape from '../hooks/useEscape';
-import SideDropMenu from './shared/SideDropMenu';
+import { BsTrash } from 'react-icons/bs';
 
 export interface Props {
     value: string
@@ -17,12 +16,11 @@ export interface Props {
     onDelete?(): void;
     volume?: number
 
-    focusKey?: number;
-
+    onClickFocus?(): void;
+    onClearFocus?(): void;
     onHitEnter?(): void;
     focus?: boolean;
-
-    alignDropMenu?: 'top' | 'bottom';
+    isDeleting?: boolean;
 
     // 👇 drag events
     onDragStart?(e: React.DragEvent<HTMLDivElement>): void;
@@ -52,11 +50,10 @@ const TodoItemCard = ({
     onDragLeave,
     onDragEnd,
     hide,
-    alignDropMenu,
     onEmptyDelete,
     onUp,
     onDown,
-    focusKey
+    onClickFocus
 }: Props) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [text, setText] = useState(value);
@@ -65,56 +62,72 @@ const TodoItemCard = ({
     const debounceRef = useRef<number | null>(null);
     const [isEdit, setIsEdit] = useState<boolean>(false);
     const backspaceCountRef = useRef(0);
+    const isTextAreaSelectedRef = useRef<boolean>(false);
 
-    useEscape(() => {
-        setIsEdit(false);
-    });
+
+    const MAX_ROWS = -1; // -1 = infinite
 
     const autoResize = () => {
         const el = textareaRef.current;
         if (!el) return;
 
+        const computed = window.getComputedStyle(el);
+        let lineHeight = parseFloat(computed.lineHeight);
+
+        if (isNaN(lineHeight)) {
+            const fontSize = parseFloat(computed.fontSize);
+            lineHeight = fontSize * 1.2;
+        }
+
         el.style.height = "auto";
-        el.style.height = el.scrollHeight + "px";
+
+        if (MAX_ROWS === -1) {
+            // no limit
+            el.style.height = el.scrollHeight + "px";
+        } else {
+            const maxHeight = lineHeight * MAX_ROWS;
+            el.style.height = Math.min(el.scrollHeight, maxHeight) + "px";
+        }
     };
+
+    const blurTextArea = () => {
+        if (textareaRef.current) {
+            const el = textareaRef.current;
+            el.blur();
+        }
+    }
+
+    useEscape(() => {
+        setIsEdit(false);
+    });
 
     useEffect(() => {
         setText(value);
         autoResize();
     }, [value]);
 
-    useEffect(() => {
-        if (isEdit && textareaRef.current) {
-            const el = textareaRef.current;
-
-            el.focus();
-
-            // move cursor to end
-            const length = el.value.length;
-            el.setSelectionRange(length, length);
-
-            autoResize();
-        }
-    }, [isEdit]);
-
 
     useEffect(() => {
-        if (focus && textareaRef.current) {
-            setIsEdit(true);
+        setIsEdit(focus ? focus : false);
+        if (!focus) {
+            blurTextArea();
         }
     }, [focus]);
 
     useEffect(() => {
-        if (focusKey && textareaRef.current) {
-            setIsEdit(true);
-
+        if (isEdit && textareaRef.current) {
             const el = textareaRef.current;
-            el.focus();
 
             const length = el.value.length;
-            el.setSelectionRange(length, length);
+            if (!isTextAreaSelectedRef.current) {
+                el.setSelectionRange(length, length);
+            }
+            el.focus();
+            isTextAreaSelectedRef.current = false;
+
+            autoResize();
         }
-    }, [focusKey]);
+    }, [isEdit]);
 
     useEffect(() => {
         if (text.trim() !== "") {
@@ -164,6 +177,12 @@ const TodoItemCard = ({
         onClickCheck?.(checked);
     };
 
+    const handleTextAreaClick = (e: React.MouseEvent<HTMLTextAreaElement>) => {
+        e.stopPropagation();
+        isTextAreaSelectedRef.current = true;
+        onClickFocus?.();
+    }
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         const el = textareaRef.current;
         if (!el) return;
@@ -180,7 +199,7 @@ const TodoItemCard = ({
         }
 
         if (e.key === "Backspace") {
-            if (text.trim() === "") {
+            if (text === "") {
                 backspaceCountRef.current += 1;
 
                 if (backspaceCountRef.current >= 2) {
@@ -268,46 +287,31 @@ const TodoItemCard = ({
                     />
                 )}
 
-                <div className='relative flex flex-1' >
-                    <textarea
-                        ref={textareaRef}
-                        className={`
-                            w-full resize-none overflow-hidden bg-transparent outline-none 
-                            ${isEdit ? '' : 'cursor-pointer select-text'}
+                <textarea
+                    ref={textareaRef}
+                    className={`
+                            flex-1 w-full resize-none overflow-hidden bg-transparent outline-none 
                             `
-                        }
-                        onChange={(e) => handleTextareaChange(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        rows={1}
-                        placeholder="Untitled"
-                        value={text}
-                        readOnly={!isEdit}
-                    />
-                    {!isEdit &&
-                        <div
-                            className='absolute top-0 left-0 w-full h-full cursor-pointer'
-                            onDoubleClick={() => {
-                                setIsEdit(true);
-                            }}
-                        />
                     }
-                </div>
-
-                <SideDropMenu
-                    alignBottm={alignDropMenu == 'bottom'}
-                    options={[
-                        {
-                            icon: <MdOutlineEdit className='text-gray-700' />,
-                            label: 'Edit',
-                            onClick: () => { setIsEdit(true) }
-                        },
-                        {
-                            icon: <MdDeleteOutline className='text-red-500' />,
-                            label: 'Delete',
-                            onClick: () => { onDelete?.() }
-                        }
-                    ]}
+                    onChange={(e) => handleTextareaChange(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    rows={1}
+                    placeholder="Untitled"
+                    onClick={handleTextAreaClick}
+                    value={text}
                 />
+
+
+                <button
+                    className={
+                        `
+                        inline-flex text-red-700 hover:text-red-800 text-sm items-center justify-center shrink-0 grow-0 w-5 h-5 cursor-pointer opacity-70 hover:opacity-100
+                        `
+                    }
+                    onClick={(e) => { e.stopPropagation(); onDelete?.() }}
+                >
+                    <BsTrash />
+                </button>
 
             </div>
         </div>

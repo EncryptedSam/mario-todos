@@ -3,7 +3,6 @@ import TodoGroupCard from './TodoGroupCard';
 import type { TodoGroupWithStats } from '../db/schema';
 import createClone from '../utils/createClone';
 import reorderByIndex from '../utils/reorderByIndex';
-import { AiOutlineContainer } from 'react-icons/ai';
 import { EmptyStateBackground } from './EmptyStateBackground';
 
 function move<T>(arr: T[], selectedIndex: number, movedToIndex: number): T[] {
@@ -14,7 +13,6 @@ function move<T>(arr: T[], selectedIndex: number, movedToIndex: number): T[] {
 
     return result;
 }
-
 
 interface Props {
     data?: TodoGroupWithStats[];
@@ -141,7 +139,7 @@ const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDele
     return (
         <div
             ref={containerRef}
-            className='flex-1 pt-2.5 space-y-2.5! min-h-0 scroll-hidden overflow-auto scroll-smooth'
+            className='relative flex-1 pt-2.5 space-y-2.5! min-h-0 scroll-hidden overflow-auto scroll-smooth'
         >
             {
                 groups?.map(({ id, title, completed, total, sortOrder }, idx) => {
@@ -203,3 +201,7 @@ const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDele
 }
 
 export default TodoGroups
+
+
+
+

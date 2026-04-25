@@ -3,7 +3,7 @@ import NavBar from '../components/NavBar'
 import TodoGroupCard from '../components/TodoGroupCard'
 import AddNewButton from '../components/AddNewButton'
 import { useNavigate } from 'react-router-dom'
-import { getGroupByIdWithStats } from '../services/todoGroup.service'
+import { getGroupByIdWithStats, updateGroup } from '../services/todoGroup.service'
 import { useParams } from "react-router-dom";
 import type { TodoGroupWithStats, TodoItem } from '../db/schema'
 import { getVolume, setVolume, getConfetti, setConfetti } from '../services/settings.service'
@@ -12,25 +12,41 @@ import Confetti from 'react-confetti'
 import DeleteAlertModal from '../components/DeleteAlertModal'
 import TodoItems, { type Props as TodoItemsProps } from '../components/TodoItems'
 import useEscape from '../hooks/useEscape'
+import KeybindingTableModal from '../components/KeybindingTableModal'
+import NewlineToast from '../components/NewlineToast'
 
 
+export const keybindings = [
+    { key: ["Backspace"], action: "Double press to delete empty" },
+    { key: ["Ctrl", "Up"], action: "Jump to previous" },
+    { key: ["Ctrl", "Down"], action: "Jump to next" },
+    { key: ["Up"], action: "Previous task/group" },
+    { key: ["Down"], action: "Next task/group" },
+];
 const TodoItemsContainers = () => {
     const navigate = useNavigate();
     const { id: groupId } = useParams();
 
-    const [deleteId, setDeleteId] = useState<number | null>(null);
+    const [deleteId, setDeleteId] = useState<number | undefined>(undefined);
 
     const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
     const [localVolume, setLocalVolume] = useState<number>(0);
-    const [inputFocusId, setInputFocusId] = useState<number | null>(null);
+    const [focusId, setFocusId] = useState<number | undefined>(undefined);
     const [showConfetti, setShowConfetti] = useState<boolean>(true);
+    const [showHotKeys, setShowHotKeys] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [showNewLineToast, setShowNewLineToast] = useState<boolean>(false);
 
     const [group, setGroup] = useState<TodoGroupWithStats>();
     const [items, setItems] = useState<TodoItem[]>([]);
 
     const itemIdTimeoutRef = useRef<number | undefined>(undefined);
-    const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+    const isCreatingRef = useRef<boolean>(false);
+
+    useEscape(() => {
+        setDeleteId(undefined);
+        setFocusId(undefined);
+    });
 
 
     const loadConfetti = async () => {
@@ -49,13 +65,9 @@ const TodoItemsContainers = () => {
     }
 
     const loadGroup = async () => {
-        const rows = await getGroupByIdWithStats(Number(groupId));
-        setGroup(rows);
+        const group = await getGroupByIdWithStats(Number(groupId));
+        setGroup(group);
     }
-
-    useEscape(() => {
-        setDeleteId(null);
-    });
 
     useEffect(() => {
         (async () => {
@@ -70,27 +82,24 @@ const TodoItemsContainers = () => {
     const handleCreateItem = async (sortOrder?: number) => {
         setFilter('all');
 
-        const res = await createItem(Number(groupId), '', sortOrder);
-        await loadItems();
+        if (isCreatingRef.current == false) {
+            isCreatingRef.current = true;
+            const id = await createItem(Number(groupId), '', sortOrder);
+            await loadItems();
+            await loadGroup();
+
+            if (typeof id == 'number') {
+                setFocusId(id);
+            }
+            isCreatingRef.current = false;
+        }
+
+
+    }
+
+    const handleGroupCardChange = async (id: number, value: string) => {
+        await updateGroup(id, value);
         await loadGroup();
-
-        setInputFocusId(res);
-
-        clearTimeout(itemIdTimeoutRef.current);
-
-        itemIdTimeoutRef.current = setTimeout(() => {
-            setInputFocusId(null);
-        }, 200)
-
-        setTimeout(() => {
-            const el = itemRefs.current.get(res);
-            if (!el) return;
-
-            el.scrollIntoView({
-                behavior: "smooth",
-                block: "nearest",
-            });
-        }, 0);
     }
 
     const handleUpdateCompleted = async (itemId: number, value: boolean) => {
@@ -115,7 +124,7 @@ const TodoItemsContainers = () => {
             await deleteItem(deleteId);
             await loadItems();
             await loadGroup();
-            setDeleteId(null)
+            setDeleteId(undefined)
         }
     }
 
@@ -123,14 +132,9 @@ const TodoItemsContainers = () => {
         await deleteItem(id);
         await loadItems();
         await loadGroup();
-        setDeleteId(null)
+        setDeleteId(undefined)
         if (focusId) {
-            setInputFocusId(focusId);
-            clearTimeout(itemIdTimeoutRef.current);
-
-            itemIdTimeoutRef.current = setTimeout(() => {
-                setInputFocusId(null);
-            }, 200)
+            setFocusId(focusId);
         }
     }
 
@@ -174,24 +178,34 @@ const TodoItemsContainers = () => {
         <>
             <NavBar
                 onChangeFilter={setFilter}
-                
+
                 volumeSlider={{
                     value: localVolume,
                     onChange: (value) => { handleVolume(value) }
                 }}
-                
+
                 volumeValue={(localVolume / 100) * 1}
                 onClickBack={() => { navigate(`/`); }}
 
                 confettiValue={showConfetti}
                 onClickConfetti={handleConfetti}
                 showConfetti={percentage == 100}
+                onClickHotKeys={() => { setShowHotKeys(true) }}
             />
             <div className='relative  pt-2 pb-2 min-h-0 scroll-hidden overflow-auto' >
                 {group &&
                     <TodoGroupCard
                         value={group.title ?? ''}
                         completed={group.completed}
+
+                        onHitEnter={() => {
+                            setShowNewLineToast(true);
+                        }}
+
+                        onChange={(value) => {
+                            handleGroupCardChange(Number(groupId), value);
+                        }}
+
                         total={group.total}
                         type='step'
                         readonly
@@ -201,17 +215,24 @@ const TodoItemsContainers = () => {
             </div>
             <TodoItems
                 data={mappedItems}
-                focusId={inputFocusId}
                 volume={(localVolume / 100) * 1}
                 onDelete={(id) => { setDeleteId(Number(id)) }}
                 onChangeText={(id, value) => { handleUpdateContent(id, value) }}
                 onClickCheck={(id, value) => { handleUpdateCompleted(id, value) }}
-                onHitEnter={(sortOrder) => { handleCreateItem(sortOrder) }}
+                onHitEnter={(sortOrder) => { setShowNewLineToast(true); handleCreateItem(sortOrder) }}
                 onEmptyDelete={handleDeleteItemOnEmpty}
                 onReorder={handleBulkReorder}
                 isEmpty={items.length == 0}
                 onCreateNew={() => { handleCreateItem() }}
                 isLoading={isLoading}
+
+                onUp={(value) => { setFocusId(value) }}
+                onDown={(value) => { setFocusId(value) }}
+                deleteId={deleteId}
+
+                focusId={typeof deleteId == 'number' ? undefined : focusId}
+                onClickFocus={(id) => { setFocusId(id) }}
+                onClearFocus={(id) => { id == focusId && setFocusId(undefined); }}
             />
             <AddNewButton
                 type='task'
@@ -227,10 +248,21 @@ const TodoItemsContainers = () => {
             {
                 deleteId &&
                 <DeleteAlertModal
-                    onCancel={() => { setDeleteId(null) }}
+                    onCancel={() => { setDeleteId(undefined) }}
                     onDelete={handleDeleteItem}
                     placeholder='Item'
                 />
+            }
+            {
+                showHotKeys &&
+                <KeybindingTableModal
+                    data={keybindings}
+                    onClose={() => { setShowHotKeys(false) }}
+                />
+            }
+            {
+                showNewLineToast &&
+                <NewlineToast onClose={() => { setShowNewLineToast(false) }} />
             }
         </>
     )

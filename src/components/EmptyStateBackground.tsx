@@ -23,7 +23,7 @@ export const EmptyStateBackground = ({
         task: {
             icon: <FaRegListAlt className="text-3xl opacity-70" />,
             title: "Looks like you don't have any task yet",
-            description: "Add your first item to begin",
+            description: "Add your first task to begin",
             button: "Add Task",
         },
     };

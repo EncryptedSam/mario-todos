@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { BsTrash } from 'react-icons/bs';
+import useEscape from '../hooks/useEscape';
 
 interface Props {
     type?: 'progress' | 'step';
@@ -67,14 +68,39 @@ const TodoGroupCard = ({
     const [readMore, setReadMore] = useState<boolean>(false);
     const backspaceCountRef = useRef(0);
     const isTextAreaSelectedRef = useRef<boolean>(false);
+    const [isReadonlyDisabled, setIsReadonlyDisabled] = useState(false);
+
+    const MAX_ROWS = -1; // -1 = infinite
 
     const autoResize = () => {
         const el = textareaRef.current;
         if (!el) return;
 
+        const computed = window.getComputedStyle(el);
+        let lineHeight = parseFloat(computed.lineHeight);
+
+        if (isNaN(lineHeight)) {
+            const fontSize = parseFloat(computed.fontSize);
+            lineHeight = fontSize * 1.2;
+        }
+
         el.style.height = "auto";
-        el.style.height = el.scrollHeight + "px";
+
+        if (MAX_ROWS === -1) {
+            // no limit
+            el.style.height = el.scrollHeight + "px";
+        } else {
+            const maxHeight = lineHeight * MAX_ROWS;
+            el.style.height = Math.min(el.scrollHeight, maxHeight) + "px";
+        }
     };
+
+    useEscape(() => {
+        if (isReadonlyDisabled) {
+            setIsReadonlyDisabled(false);
+            setIsEdit(false);
+        }
+    });
 
     const blurTextArea = () => {
         if (textareaRef.current) {
@@ -118,9 +144,12 @@ const TodoGroupCard = ({
                 !containerRef.current.contains(e.target as Node)
             ) {
                 if (isEdit) {
-                    console.log(isEdit);
                     blurTextArea();
                     onClearFocus?.();
+                }
+                if (isReadonlyDisabled) {
+                    setIsReadonlyDisabled(false);
+                    setIsEdit(false);
                 }
             }
         };
@@ -159,7 +188,7 @@ const TodoGroupCard = ({
         }
 
         if (e.key === "Backspace") {
-            if (text.trim() === "") {
+            if (text === "") {
                 backspaceCountRef.current += 1;
 
                 if (backspaceCountRef.current >= 2) {
@@ -218,6 +247,11 @@ const TodoGroupCard = ({
         onClickFocus?.();
     }
 
+    const handleReadonlyDoubleClick = () => {
+        setIsReadonlyDisabled(true);
+        setIsEdit(true);
+    }
+
 
     let percentage: number = ((completed / total) * 100);
 
@@ -229,6 +263,7 @@ const TodoGroupCard = ({
     if (total == 0) {
         progressType = 'progress'
     }
+
 
     return (
         <div
@@ -257,7 +292,7 @@ const TodoGroupCard = ({
             >
 
                 <div className='flex w-full text-sm font-medium'>
-                    {!readonly &&
+                    {(!readonly || isReadonlyDisabled) &&
                         <textarea
                             ref={textareaRef}
                             className={`flex-1 w-full resize-none overflow-hidden bg-transparent outline-none cursor-text`}
@@ -269,7 +304,7 @@ const TodoGroupCard = ({
                             placeholder="Untitled"
                         />
                     }
-                    {readonly &&
+                    {(readonly && !isReadonlyDisabled) &&
                         <div className={`flex-1 overflow-hidden space-y-1`} >
                             <p
                                 className={
@@ -278,14 +313,9 @@ const TodoGroupCard = ({
                                 ${text.length == 0 ? 'text-gray-400' : ''}
                                 `
                                 }
-                                onClick={() => { setReadMore(true) }}
+                                onDoubleClick={handleReadonlyDoubleClick}
+                                onClick={() => { setReadMore(!readMore) }}
                             >{text ? text : 'Untitled'}</p>
-                            {readMore &&
-                                <button
-                                    className='text-gray-700 cursor-pointer'
-                                    onClick={() => { setReadMore(false) }}
-                                >show less</button>
-                            }
                         </div>
                     }
                     {!readonly &&
@@ -341,6 +371,7 @@ const TodoGroupCard = ({
                     </div>
                 }
             </div>
+
         </div>
 
     );

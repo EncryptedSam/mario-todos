@@ -19,8 +19,8 @@ type Item = { id: number, sortOrder: number, value: string, checked: boolean };
 export interface Props {
     data?: Item[]
 
-
-    focusId: number | null;
+    deleteId?: number;
+    focusId?: number;
 
     volume: number;
     onReorder?(args: { id: number, sortOrder: number }[]): void;
@@ -31,6 +31,11 @@ export interface Props {
     onClickCheck: (itemId: number, value: boolean) => void,
     onHitEnter: (sortOrder: number) => void,
 
+    onUp?: (itemId?: number) => void;
+    onDown?: (itemId?: number) => void;
+    onClickFocus?: (itemId: number) => void;
+    onClearFocus?: (itemId: number) => void;
+
     onEmptyDelete?: (itemId: number, focusId?: number) => void;
 
     isEmpty?: boolean;
@@ -39,7 +44,7 @@ export interface Props {
 }
 
 
-const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEnter, focusId, onReorder, onEmptyDelete, isEmpty, onCreateNew, isLoading }: Props) => {
+const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEnter, focusId, onReorder, onEmptyDelete, isEmpty, onCreateNew, isLoading, deleteId, onUp, onDown, onClickFocus, onClearFocus }: Props) => {
     const [items, setItems] = useState<Props['data']>(data);
     const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -48,8 +53,6 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
     const [hoverSortOrder, setHoverSortOrder] = useState<number | null>(null);
     const [dragIndex, setDragIndex] = useState<number | null>(null);
     const [overIndex, setOverIndex] = useState<number | null>(null);
-
-    const [focusState, setFocusState] = useState<{ id: number, key: number } | null>(null);
 
     const scrollSpeed = 10;
     const scrollThreshold = 80;
@@ -138,18 +141,6 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
         setHoverSortOrder(null);
     };
 
-    const handleOnUp = (prevId?: number) => {
-        if (prevId) {
-            setFocusState({ id: prevId, key: Date.now() });
-        }
-    };
-
-    const handleOnDown = (nextId?: number) => {
-        if (nextId) {
-            setFocusState({ id: nextId, key: Date.now() });
-        }
-    };
-
     return (
         <div
             ref={containerRef}
@@ -158,20 +149,23 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
             {
                 items?.map(({ id, sortOrder, value, checked }, idx) => {
 
-                    let prevFocusId: number;
-                    if (idx - 1 >= 0) {
-                        prevFocusId = items[idx - 1].id;
+                    let prevFocusId: number | undefined;
+                    let nextFocusId: number | undefined;
+
+                    if (items.length > 0) {
+                        if (idx > 0) {
+                            prevFocusId = items[idx - 1].id;
+                        } else {
+                            prevFocusId = items[0].id;
+                        }
+
+                        if (idx < items.length - 1) {
+                            nextFocusId = items[idx + 1].id;
+                        } else {
+                            nextFocusId = items[idx].id;
+                        }
                     }
 
-                    let nextFocusId: number;
-                    if (idx + 1 < items.length) {
-                        nextFocusId = items[idx + 1].id;
-                    }
-
-                    let alignDropMenu: 'top' | 'bottom' = 'top';
-                    if (idx == items.length - 1 && idx > 0) {
-                        alignDropMenu = 'bottom';
-                    }
 
                     return (
                         <TodoItemCard
@@ -180,7 +174,7 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
                             checked={checked}
 
                             focus={focusId == id}
-                            focusKey={(focusState?.id === id) ? focusState.key : undefined}
+                            isDeleting={deleteId == id}
 
                             volume={volume}
                             hide={sortOrder == dragSortOrder}
@@ -190,10 +184,11 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
                             onDelete={() => { onDelete(id) }}
                             onHitEnter={() => { onHitEnter(sortOrder + 1) }}
                             onEmptyDelete={() => { onEmptyDelete?.(id, prevFocusId) }}
-                            onUp={() => { handleOnUp(prevFocusId) }}
-                            onDown={() => { handleOnDown(nextFocusId) }}
+                            onUp={() => { onUp?.(prevFocusId) }}
+                            onDown={() => { onDown?.(nextFocusId) }}
 
-                            alignDropMenu={alignDropMenu}
+                            onClickFocus={() => { onClickFocus?.(Number(id)) }}
+                            onClearFocus={() => { onClearFocus?.(Number(id)) }}
 
                             onDragStart={(e) => { handleDragStart(e, sortOrder, idx) }}
                             onDragOver={(e) => { handleDragOver(e, idx) }}

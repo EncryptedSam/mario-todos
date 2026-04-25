@@ -8,6 +8,7 @@ import { getVolume, setVolume } from '../services/settings.service'
 import TodoGroups from '../components/TodoGroups'
 import DeleteAlertModal from '../components/DeleteAlertModal'
 import useEscape from '../hooks/useEscape'
+import NewlineToast from '../components/NewlineToast'
 
 const TodoGroupsContainers = () => {
     const [filter, setFilter] = useState<string>('all');
@@ -16,6 +17,7 @@ const TodoGroupsContainers = () => {
     const [groups, setGroups] = useState<TodoGroupWithStats[]>([]);
     const [focusId, setFocusId] = useState<number | undefined>(undefined);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [showNewLineToast, setShowNewLineToast] = useState<boolean>(false);
     const isCreatingRef = useRef<boolean>(false);
     const navigate = useNavigate();
 
@@ -110,7 +112,7 @@ const TodoGroupsContainers = () => {
                 onChange={(id, value) => { handleCardChange(Number(id), value) }}
                 onDelete={(id) => { setDeleteId(Number(id)) }}
                 onClick={(id) => { navigate(`/group/${id}/`); }}
-                onHitEnter={(sortOrder) => { handleCreateGroup(sortOrder) }}
+                onHitEnter={(sortOrder) => { setShowNewLineToast(true); handleCreateGroup(sortOrder) }}
                 onEmptyDelete={handleDeleteItemOnEmpty}
                 onUp={(value) => { setFocusId(value) }}
                 onDown={(value) => { setFocusId(value) }}
@@ -135,6 +137,10 @@ const TodoGroupsContainers = () => {
                     onDelete={handleDeleteGroup}
                     placeholder='Group'
                 />
+            }
+            {
+                showNewLineToast &&
+                <NewlineToast onClose={() => { setShowNewLineToast(false) }} />
             }
         </>
     )
