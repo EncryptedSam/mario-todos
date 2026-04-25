@@ -230,18 +230,18 @@ const TodoItemsContainers = () => {
                 onClick={() => { handleCreateItem() }}
             />
             {
+                deleteId &&
+                <DeleteAlertModal
+                onCancel={() => { setDeleteId(undefined) }}
+                onDelete={handleDeleteItem}
+                placeholder='Item'
+                />
+            }
+            {
                 (showConfetti && percentage == 100) &&
                 <Confetti
                     className='h-full m-auto'
                     recycle={true}
-                />
-            }
-            {
-                deleteId &&
-                <DeleteAlertModal
-                    onCancel={() => { setDeleteId(undefined) }}
-                    onDelete={handleDeleteItem}
-                    placeholder='Item'
                 />
             }
             {

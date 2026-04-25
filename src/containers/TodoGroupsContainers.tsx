@@ -4,12 +4,20 @@ import AddNewButton from '../components/AddNewButton'
 import { createGroup, getGroupsWithStats, updateGroup, deleteGroup, bulkUpdateGroupOrder } from '../services/todoGroup.service'
 import type { TodoGroupWithStats } from '../db/schema'
 import { useNavigate } from 'react-router-dom'
-import { getVolume, setVolume } from '../services/settings.service'
+import { getVolume, setConfetti, setVolume } from '../services/settings.service'
 import TodoGroups from '../components/TodoGroups'
 import DeleteAlertModal from '../components/DeleteAlertModal'
 import useEscape from '../hooks/useEscape'
 import NewlineToast from '../components/NewlineToast'
 import KeybindingTableModal from '../components/KeybindingTableModal'
+import ReactConfetti from 'react-confetti'
+
+const areAllGroupsCompleted = (groups: TodoGroupWithStats[]) => {
+    return groups.every(group => {
+        if (group.total === 0) return false;
+        return group.completed === group.total;
+    });
+};
 
 const TodoGroupsContainers = () => {
     const [filter, setFilter] = useState<string>('all');
@@ -17,6 +25,7 @@ const TodoGroupsContainers = () => {
     const [localVolume, setLocalVolume] = useState<number>(0);
     const [groups, setGroups] = useState<TodoGroupWithStats[]>([]);
     const [focusId, setFocusId] = useState<number | undefined>(undefined);
+    const [showConfetti, setShowConfetti] = useState<boolean>(true);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [showNewLineToast, setShowNewLineToast] = useState<boolean>(false);
     const [showHotKeys, setShowHotKeys] = useState<boolean>(false);
@@ -91,6 +100,11 @@ const TodoGroupsContainers = () => {
         await loadRows();
     }
 
+    const handleConfetti = async () => {
+        setShowConfetti(!showConfetti);
+        setConfetti(!showConfetti);
+    }
+
     const filteredGroups: TodoGroupWithStats[] = useMemo(() => {
         return groups
             .filter(({ completed }) => {
@@ -100,6 +114,8 @@ const TodoGroupsContainers = () => {
             })
     }, [groups, filter]);
 
+    const allGroupsCompleted = areAllGroupsCompleted(groups);
+
     return (
         < >
             <NavBar
@@ -108,8 +124,14 @@ const TodoGroupsContainers = () => {
                     value: localVolume,
                     onChange: (value) => { handleVolume(value) }
                 }}
+
+                volumeValue={(localVolume / 100) * 1}
+                confettiValue={showConfetti}
+                onClickConfetti={handleConfetti}
+                showConfetti={allGroupsCompleted}
+                onClickHotKeys={() => { setShowHotKeys(true) }}
             />
-            
+
             <TodoGroups
                 data={filteredGroups}
                 onChange={(id, value) => { handleCardChange(Number(id), value) }}
@@ -144,6 +166,13 @@ const TodoGroupsContainers = () => {
             {
                 showNewLineToast &&
                 <NewlineToast onClose={() => { setShowNewLineToast(false) }} />
+            }
+            {
+                (showConfetti && allGroupsCompleted) &&
+                <ReactConfetti
+                    className='h-full m-auto'
+                    recycle={true}
+                />
             }
             {
                 showHotKeys &&
