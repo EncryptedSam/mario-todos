@@ -15,9 +15,9 @@ const Layout = ({ children }: Props) => {
                 repeating-linear-gradient(
                     -45deg,
                     ${hexWithAlpha('#f3f4f6', 0.04)} 0px,
-                    ${hexWithAlpha('#f3f4f6', 0.04)} 10px,
-                    ${hexWithAlpha('#111827', 0.04)} 10px,
-                    ${hexWithAlpha('#111827', 0.04)} 20px
+                    ${hexWithAlpha('#f3f4f6', 0.04)} 20px,
+                    ${hexWithAlpha('#111827', 0.04)} 20px,
+                    ${hexWithAlpha('#111827', 0.04)} 40px
                 )
             `
             }}
