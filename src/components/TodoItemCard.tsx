@@ -205,7 +205,7 @@ const TodoItemCard = ({
 
                 if (backspaceCountRef.current >= 2) {
                     e.preventDefault();
-                    onEmptyDelete?.();
+                    onDelete?.();
                     backspaceCountRef.current = 0;
                 }
             } else {

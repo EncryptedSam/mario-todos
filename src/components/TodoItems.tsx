@@ -25,7 +25,7 @@ export interface Props {
     volume: number;
     onReorder?(args: { id: number, sortOrder: number }[]): void;
 
-    onDelete: (itemId: number) => void,
+    onDelete: (itemId: number, focusId?: number) => void,
     onChangeText: (itemId: number, value: string) => void,
 
     onClickCheck: (itemId: number, value: boolean) => void,
@@ -151,6 +151,7 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
 
                     let prevFocusId: number | undefined;
                     let nextFocusId: number | undefined;
+                    let deleteFocusId: number | undefined;
 
                     if (items.length > 0) {
                         if (idx > 0) {
@@ -164,8 +165,16 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
                         } else {
                             nextFocusId = items[idx].id;
                         }
+
                     }
 
+                    if (items.length > 1) {
+                        if (idx < items.length - 1) {
+                            deleteFocusId = items[idx + 1].id;
+                        } else {
+                            deleteFocusId = items[idx - 1].id;
+                        }
+                    }
 
                     return (
                         <TodoItemCard
@@ -181,9 +190,8 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
 
                             onChangeText={(value) => { onChangeText(id, value) }}
                             onClickCheck={(value) => { onClickCheck(id, value) }}
-                            onDelete={() => { onDelete(id) }}
                             onHitEnter={() => { onHitEnter(sortOrder + 1) }}
-                            onEmptyDelete={() => { onEmptyDelete?.(id, prevFocusId) }}
+                            onDelete={() => { onDelete(id, deleteFocusId) }}
                             onUp={() => { onUp?.(prevFocusId) }}
                             onDown={() => { onDown?.(nextFocusId) }}
 

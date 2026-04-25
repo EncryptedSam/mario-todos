@@ -16,6 +16,29 @@ import KeybindingTableModal from '../components/KeybindingTableModal'
 import NewlineToast from '../components/NewlineToast'
 
 
+function useConfirmResolver() {
+    const [resolver, setResolver] = useState<((value: boolean) => void) | null>(null);
+
+    const confirm = () => {
+        return new Promise<boolean>((resolve) => {
+            setResolver(() => resolve);
+        });
+    };
+
+    const onConfirm = () => {
+        resolver?.(true);
+        setResolver(null);
+    };
+
+    const onCancel = () => {
+        resolver?.(false);
+        setResolver(null);
+    };
+
+    return { confirm, onConfirm, onCancel };
+}
+
+
 
 const TodoItemsContainers = () => {
     const navigate = useNavigate();
@@ -33,6 +56,8 @@ const TodoItemsContainers = () => {
 
     const [group, setGroup] = useState<TodoGroupWithStats>();
     const [items, setItems] = useState<TodoItem[]>([]);
+
+    const { onConfirm, onCancel, confirm } = useConfirmResolver();
 
     const isCreatingRef = useRef<boolean>(false);
 
@@ -110,13 +135,19 @@ const TodoItemsContainers = () => {
         await loadItems();
     }
 
-    const handleDeleteItem = async () => {
-        if (typeof deleteId == 'number') {
-            await deleteItem(deleteId);
+    const handleDeleteItem = async (itemId: number, focusId?: number) => {
+
+        setDeleteId(itemId);
+        const ok = await confirm();
+        if (ok && typeof itemId == 'number') {
+            await deleteItem(itemId);
             await loadItems();
             await loadGroup();
-            setDeleteId(undefined)
+            if (typeof focusId == 'number') {
+                setFocusId(focusId);
+            }
         }
+        setDeleteId(undefined)
     }
 
     const handleDeleteItemOnEmpty = async (id: number, focusId?: number) => {
@@ -177,7 +208,6 @@ const TodoItemsContainers = () => {
 
                 volumeValue={(localVolume / 100) * 1}
                 onClickBack={() => { navigate(`/`); }}
-
                 confettiValue={showConfetti}
                 onClickConfetti={handleConfetti}
                 showConfetti={percentage == 100}
@@ -207,7 +237,9 @@ const TodoItemsContainers = () => {
             <TodoItems
                 data={mappedItems}
                 volume={(localVolume / 100) * 1}
-                onDelete={(id) => { setDeleteId(Number(id)) }}
+
+                onDelete={(id, focusId) => { handleDeleteItem(id, focusId) }}
+
                 onChangeText={(id, value) => { handleUpdateContent(id, value) }}
                 onClickCheck={(id, value) => { handleUpdateCompleted(id, value) }}
                 onHitEnter={(sortOrder) => { setShowNewLineToast(true); handleCreateItem(sortOrder) }}
@@ -232,9 +264,9 @@ const TodoItemsContainers = () => {
             {
                 deleteId &&
                 <DeleteAlertModal
-                onCancel={() => { setDeleteId(undefined) }}
-                onDelete={handleDeleteItem}
-                placeholder='Item'
+                    onCancel={onCancel}
+                    onDelete={onConfirm}
+                    placeholder='Item'
                 />
             }
             {

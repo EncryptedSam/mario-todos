@@ -52,7 +52,6 @@ const TodoGroupCard = ({
     onDragEnter,
     onDragLeave,
     onDragEnd,
-    onEmptyDelete,
     onUp,
     onDown,
     onHitEnter,
