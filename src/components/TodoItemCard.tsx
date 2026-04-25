@@ -251,7 +251,7 @@ const TodoItemCard = ({
             ref={containerRef}
 
             className={`
-                relative rounded-2xl transition-none
+                relative rounded-2xl transition-none cursor-grab active:cursor-grabbing
                 ${hide ? 'border border-gray-400 border-dashed bg-transparent' : 'bg-gray-100'}
                 `
             }

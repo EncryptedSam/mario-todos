@@ -40,7 +40,6 @@ const TodoItemsContainers = () => {
     const [group, setGroup] = useState<TodoGroupWithStats>();
     const [items, setItems] = useState<TodoItem[]>([]);
 
-    const itemIdTimeoutRef = useRef<number | undefined>(undefined);
     const isCreatingRef = useRef<boolean>(false);
 
     useEscape(() => {
