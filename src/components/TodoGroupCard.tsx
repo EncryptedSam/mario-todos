@@ -15,6 +15,7 @@ interface Props {
     onClickFocus?(): void;
     onClearFocus?(): void;
     onHitEnter?(): void;
+    onCtrolEnter?(): void;
     onEmptyDelete?(): void;
     onUp?(): void;
     onDown?(): void;
@@ -58,7 +59,8 @@ const TodoGroupCard = ({
     focus,
     isDeleting,
     onClickFocus,
-    onClearFocus
+    onClearFocus,
+    onCtrolEnter
 }: Props) => {
     const [text, setText] = useState(value);
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -179,6 +181,12 @@ const TodoGroupCard = ({
         const cursorStart = el.selectionStart;
         const cursorEnd = el.selectionEnd;
         const length = el.value.length;
+        
+        if (e.key === "Enter" && e.ctrlKey) {
+            e.preventDefault();
+            onCtrolEnter?.();
+            return;
+        }
 
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
@@ -187,18 +195,14 @@ const TodoGroupCard = ({
             return;
         }
 
+
         if (e.key === "Backspace") {
             if (text === "") {
                 backspaceCountRef.current += 1;
 
                 if (backspaceCountRef.current >= 2) {
                     e.preventDefault();
-
-                    if (total == 0) {
-                        onEmptyDelete?.();
-                    } else {
-                        onDelete?.();
-                    }
+                    onDelete?.();
 
                     backspaceCountRef.current = 0;
                 }
@@ -269,10 +273,10 @@ const TodoGroupCard = ({
         <div
             ref={containerRef}
             className={`
-                relative rounded-2xl transition-none border
+                relative rounded-2xl border cursor-grab active:cursor-grabbing
                 ${hide ? 'border border-gray-400 border-dashed bg-transparent' : 'bg-gray-100 border-gray-200'}
                 ${isEdit ? 'border-gray-400' : ''}
-                ${isDeleting ? 'border-red-600' : ''}
+                ${isDeleting ? 'border-red-600 bg-red-100' : ''}
                 `
             }
             onClick={onClick}

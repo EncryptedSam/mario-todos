@@ -16,13 +16,7 @@ import KeybindingTableModal from '../components/KeybindingTableModal'
 import NewlineToast from '../components/NewlineToast'
 
 
-export const keybindings = [
-    { key: ["Backspace"], action: "Double press to delete empty" },
-    { key: ["Ctrl", "Up"], action: "Jump to previous" },
-    { key: ["Ctrl", "Down"], action: "Jump to next" },
-    { key: ["Up"], action: "Previous task/group" },
-    { key: ["Down"], action: "Next task/group" },
-];
+
 const TodoItemsContainers = () => {
     const navigate = useNavigate();
     const { id: groupId } = useParams();
@@ -92,8 +86,6 @@ const TodoItemsContainers = () => {
             }
             isCreatingRef.current = false;
         }
-
-
     }
 
     const handleGroupCardChange = async (id: number, value: string) => {
@@ -255,7 +247,6 @@ const TodoItemsContainers = () => {
             {
                 showHotKeys &&
                 <KeybindingTableModal
-                    data={keybindings}
                     onClose={() => { setShowHotKeys(false) }}
                 />
             }

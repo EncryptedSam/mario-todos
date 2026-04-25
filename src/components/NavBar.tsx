@@ -22,7 +22,6 @@ interface Props {
 
 const NavBar = ({ volumeSlider, onChangeFilter, onClickBack, confettiValue, onClickConfetti, showConfetti, volumeValue, onClickHotKeys }: Props) => {
     const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
-    // const audioRef = useRef<HTMLAudioElement | null>(null);
     const audioRef = useRef<HTMLAudioElement | null>(new Audio(wonSound));
 
     useEffect(() => {
@@ -149,7 +148,7 @@ const DropDownSettings = ({ confettiValue, onClickConfetti, onClickHotkeys }: Dr
             {showOptions &&
                 <div
                     className={`
-                        absolute flex flex-col text-sm py-2 min-w-30 rounded-xl border border-gray-200 bg-gray-100 z-10 shadow-md top-[calc(100%+8px)] right-0 w-40
+                        absolute flex flex-col text-sm py-2 min-w-30 rounded-xl border border-gray-200 bg-gray-100 z-1 shadow-md top-[calc(100%+8px)] right-0 w-40
                         `
                     }
                 >

@@ -7,11 +7,20 @@ type Keybinding = {
 };
 
 interface Props {
-    data: Keybinding[];
+    data?: Keybinding[];
     onClose?: () => void
 }
 
-function KeybindingTableModal({ data, onClose }: Props) {
+const keybindings = [
+    { key: ["Backspace"], action: "Double press to delete empty" },
+    { key: ["Ctrl", "Up"], action: "Jump to previous" },
+    { key: ["Ctrl", "Down"], action: "Jump to next" },
+    { key: ["Up"], action: "Previous task/group" },
+    { key: ["Down"], action: "Next task/group" },
+];
+
+
+function KeybindingTableModal({ data = keybindings, onClose }: Props) {
 
     useEscape(() => {
         onClose?.();
@@ -19,7 +28,7 @@ function KeybindingTableModal({ data, onClose }: Props) {
 
     return (
         <div
-            className='absolute flex items-center justify-center top-0 left-0 z-10 w-full h-full'
+            className='absolute flex items-center justify-center top-0 left-0 z-1 w-full h-full'
         >
             <div
                 className='absolute bg-gray-950 opacity-50 top-0 left-0 z-0 w-full h-full'

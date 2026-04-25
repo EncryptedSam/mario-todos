@@ -176,6 +176,7 @@ const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDele
                             onDelete={() => { onDelete?.(Number(id)) }}
                             onClick={() => { onClick?.(Number(id)) }}
 
+                            onCtrolEnter={() => { onClick?.(Number(id))  }}
                             onHitEnter={() => { onHitEnter(sortOrder + 1) }}
                             onUp={() => { onUp?.(prevFocusId) }}
                             onDown={() => { onDown?.(nextFocusId) }}

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { BsExclamationCircle } from 'react-icons/bs'
 
 interface Props {
@@ -9,6 +9,22 @@ interface Props {
 
 
 const DeleteAlertModal = ({ placeholder = '<placeholder>', onCancel, onDelete }: Props) => {
+    const cancelRef = useRef<HTMLButtonElement | null>(null);
+
+    useEffect(() => {
+        cancelRef.current?.focus();
+    }, []);
+
+    useEffect(() => {
+        const handleKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') onCancel?.();
+        };
+
+        window.addEventListener('keydown', handleKey);
+        return () => window.removeEventListener('keydown', handleKey);
+    }, [onCancel]);
+
+
     return (
         <div
             className='absolute flex items-center justify-center top-0 left-0 z-1 w-full h-full'
@@ -25,11 +41,14 @@ const DeleteAlertModal = ({ placeholder = '<placeholder>', onCancel, onDelete }:
                 </div>
                 <div className='flex space-x-2' >
                     <button
-                        className='flex-1  text-gray-900 bg-gray-200 rounded-full py-2 cursor-pointer'
+                        ref={cancelRef}
+                        className='flex-1 text-gray-900 bg-gray-200 rounded-full py-2 cursor-pointer 
+                                    focus:outline-dashed focus:outline-2 focus:outline-gray-400'
                         onClick={onCancel}
                     >Cancel</button>
                     <button
-                        className='flex-1  text-gray-50 rounded-full bg-red-500  py-2 cursor-pointer'
+                        className='flex-1 text-gray-50 rounded-full bg-red-500 py-2 cursor-pointer 
+                                    focus:outline-dashed focus:outline-2 focus:outline-red-400'
                         onClick={onDelete}
                     >Delete</button>
                 </div>

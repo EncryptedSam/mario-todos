@@ -41,7 +41,7 @@ const DropDown = ({ onChange, options = [], value }: Props) => {
             </button>
 
             {open && (
-                <div className='absolute flex flex-col text-sm py-3 min-w-30 top-[calc(100%+4px)] rounded-xl border border-gray-200 bg-gray-100 z-10 shadow-md'>
+                <div className='absolute flex flex-col text-sm py-3 min-w-30 top-[calc(100%+4px)] rounded-xl border border-gray-200 bg-gray-100 z-1 shadow-md'>
                     {options.map((opt) => {
                         const isActive = opt.value === value
                         return (

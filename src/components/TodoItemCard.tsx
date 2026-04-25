@@ -53,7 +53,8 @@ const TodoItemCard = ({
     onEmptyDelete,
     onUp,
     onDown,
-    onClickFocus
+    onClickFocus,
+    isDeleting
 }: Props) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [text, setText] = useState(value);
@@ -251,8 +252,10 @@ const TodoItemCard = ({
             ref={containerRef}
 
             className={`
-                relative rounded-2xl transition-none cursor-grab active:cursor-grabbing
-                ${hide ? 'border border-gray-400 border-dashed bg-transparent' : 'bg-gray-100'}
+                relative rounded-2xl border cursor-grab active:cursor-grabbing
+                ${hide ? 'border-gray-400 border-dashed bg-transparent' : 'bg-gray-100 border-gray-200'}
+                ${isEdit ? 'border-gray-400' : ''}
+                ${isDeleting ? 'border-red-600 bg-red-100' : ''}
                 `
             }
             onDragStart={onDragStart}
@@ -266,8 +269,7 @@ const TodoItemCard = ({
         >
             <div
                 className={`
-                    relative p-3 group rounded-2xl text-sm flex space-x-3! border border-gray-200
-                    ${isEdit ? 'border-gray-400' : ''}
+                    relative p-3 group rounded-2xl text-sm flex space-x-3
                     ${hide ? 'opacity-0' : ''}
                 `}
             >

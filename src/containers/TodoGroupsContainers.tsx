@@ -9,6 +9,7 @@ import TodoGroups from '../components/TodoGroups'
 import DeleteAlertModal from '../components/DeleteAlertModal'
 import useEscape from '../hooks/useEscape'
 import NewlineToast from '../components/NewlineToast'
+import KeybindingTableModal from '../components/KeybindingTableModal'
 
 const TodoGroupsContainers = () => {
     const [filter, setFilter] = useState<string>('all');
@@ -18,6 +19,7 @@ const TodoGroupsContainers = () => {
     const [focusId, setFocusId] = useState<number | undefined>(undefined);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [showNewLineToast, setShowNewLineToast] = useState<boolean>(false);
+    const [showHotKeys, setShowHotKeys] = useState<boolean>(false);
     const isCreatingRef = useRef<boolean>(false);
     const navigate = useNavigate();
 
@@ -107,6 +109,7 @@ const TodoGroupsContainers = () => {
                     onChange: (value) => { handleVolume(value) }
                 }}
             />
+            
             <TodoGroups
                 data={filteredGroups}
                 onChange={(id, value) => { handleCardChange(Number(id), value) }}
@@ -141,6 +144,12 @@ const TodoGroupsContainers = () => {
             {
                 showNewLineToast &&
                 <NewlineToast onClose={() => { setShowNewLineToast(false) }} />
+            }
+            {
+                showHotKeys &&
+                <KeybindingTableModal
+                    onClose={() => { setShowHotKeys(false) }}
+                />
             }
         </>
     )
