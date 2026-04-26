@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { IoChevronBack } from 'react-icons/io5'
 import DropDown from './DropDown';
 import VolumeSlider, { type Props as VolumeProps } from './VolumeSlider';

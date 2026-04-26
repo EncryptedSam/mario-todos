@@ -12,6 +12,7 @@ import KeybindingTableModal from '../components/KeybindingTableModal'
 import ReactConfetti from 'react-confetti'
 import useConfirmResolver from '../hooks/useConfirmResolver'
 import NavBar from '../components/NavBar'
+import useAltN from '../hooks/useAltN'
 
 const areAllGroupsCompleted = (groups: TodoGroupWithStats[]) => {
     if (groups.length == 0) return false;
@@ -40,6 +41,7 @@ const TodoGroupsContainers = () => {
         setDeleteId(undefined);
         setFocusId(undefined);
     });
+
 
     const loadRows = async () => {
         const rows = await getGroupsWithStats();
@@ -118,6 +120,10 @@ const TodoGroupsContainers = () => {
         setShowConfetti(!showConfetti);
         setConfetti(!showConfetti);
     }
+
+    useAltN(() => {
+        handleCreateGroup();
+    });
 
     const filteredGroups: TodoGroupWithStats[] = useMemo(() => {
         return groups

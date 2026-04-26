@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import NavBar from '../components/NavBar'
 import TodoGroupCard from '../components/TodoGroupCard'
 import AddNewButton from '../components/AddNewButton'
@@ -15,6 +15,7 @@ import useEscape from '../hooks/useEscape'
 import KeybindingTableModal from '../components/KeybindingTableModal'
 import NewlineToast from '../components/NewlineToast'
 import useConfirmResolver from '../hooks/useConfirmResolver'
+import useAltN from '../hooks/useAltN'
 
 const TodoItemsContainers = () => {
     const navigate = useNavigate();
@@ -188,6 +189,10 @@ const TodoItemsContainers = () => {
                 }
             });
     }, [items, filter]);
+
+    useAltN(() => {
+        handleCreateItem();
+    });
 
     return (
         <>

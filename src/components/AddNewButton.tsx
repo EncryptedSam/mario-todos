@@ -1,4 +1,3 @@
-import React from 'react'
 import { AiOutlineContainer } from 'react-icons/ai'
 import { FaRegListAlt } from 'react-icons/fa'
 

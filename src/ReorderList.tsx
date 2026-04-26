@@ -1,5 +1,3 @@
-import React from 'react'
-
 const ReorderList = () => {
   return (
     <div>

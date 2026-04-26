@@ -31,7 +31,7 @@ const Layout = ({ children }: Props) => {
                         className='w-30 h-30 border-5 border-red-600 rounded-full bg-white bg-no-repeat bg-cover bg-center'
                         style={{
                             backgroundSize: '90%',
-                            backgroundImage: "url('/mario.png')",
+                            backgroundImage: "url('/mario-todos//mario.png')",
                         }}
                     />
                     <span className='self-start mt-10 luckiest-guy-regular'>Doo</span>
@@ -39,7 +39,7 @@ const Layout = ({ children }: Props) => {
                 <div
                     className='relative flex flex-col flex-1 border-5 border-red-600 rounded-4xl bg-repeat overflow-hidden'
                     style={{
-                        background: "url('/bg-mario.png')",
+                        background: "url('/mario-todos/bg-mario.png')",
                         backgroundSize: '130px'
                     }}
                 >

@@ -293,7 +293,7 @@ const TodoItemCard = ({
                         className='shrink-0 w-5 h-5 bg-no-repeat bg-cover bg-center cursor-pointer mario-hit'
                         onClick={handleCheck}
                         style={{
-                            backgroundImage: "url('/coin.gif')",
+                            backgroundImage: "url('/mario-todos/coin.gif')",
                             backgroundSize: '30px'
                         }}
                     />

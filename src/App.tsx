@@ -1,20 +1,20 @@
 import { Route, Routes } from 'react-router-dom';
 import TodoGroupsPage from './pages/TodoGroupsPage';
 import TodoItemsPage from './pages/TodoItemsPage';
-import { useEffect } from 'react';
-import { resetDB } from './db/utils';
-import ReorderList from './ReorderList';
+// import { useEffect } from 'react';
+// import { resetDB } from './db/utils';
+// import ReorderList from './ReorderList';
+
+// useEffect(() => {
+//   const init = async () => {
+//     await resetDB();
+//   };
+
+//   init();
+// }, []);
 
 
 function App() {
-
-  // useEffect(() => {
-  //   const init = async () => {
-  //     await resetDB();
-  //   };
-
-  //   init();
-  // }, []);
 
 
   return (
