@@ -22,7 +22,7 @@ const Layout = ({ children }: Props) => {
             `
             }}
         >
-            <div className='relative pt-20! max-h-215 h-screen w-110 flex flex-col'>
+            <div className='relative pt-20! max-h-215 h-full w-110 flex flex-col'>
                 <div
                     className='absolute w-full flex justify-center items-center top-0 z-10 text-gray-100 font-bold space-x-3! text-4xl pointer-events-none'
                 >
@@ -30,6 +30,7 @@ const Layout = ({ children }: Props) => {
                     <div
                         className='w-30 h-30 border-5 border-red-600 rounded-full bg-white bg-no-repeat bg-cover bg-center'
                         style={{
+                            backgroundSize: '90%',
                             backgroundImage: "url('/mario.png')",
                         }}
                     />

@@ -12,7 +12,7 @@ interface Props {
     onClickBack?(): void;
     onClickConfetti?(): void;
     confettiValue?: boolean;
-    showConfetti?: boolean;
+    playWon?: boolean;
     onClickHotKeys?: () => void;
 
     onVolumeChange?(): void;
@@ -20,7 +20,7 @@ interface Props {
     onChangeFilter?(value: 'all' | 'pending' | 'completed'): void;
 }
 
-const NavBar = ({ volumeSlider, onChangeFilter, onClickBack, confettiValue, onClickConfetti, showConfetti, volumeValue, onClickHotKeys }: Props) => {
+const NavBar = ({ volumeSlider, onChangeFilter, onClickBack, confettiValue, onClickConfetti, playWon, volumeValue, onClickHotKeys }: Props) => {
     const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const [canPlayAudio, setCanPlayAudio] = useState(false);
@@ -55,7 +55,7 @@ const NavBar = ({ volumeSlider, onChangeFilter, onClickBack, confettiValue, onCl
         const audio = audioRef.current;
         if (!audio) return;
 
-        if (showConfetti && canPlayAudio) {
+        if (playWon && canPlayAudio) {
             audio.currentTime = 0;
             audio.play().catch(() => { });
         } else {
@@ -70,7 +70,7 @@ const NavBar = ({ volumeSlider, onChangeFilter, onClickBack, confettiValue, onCl
             audio.currentTime = 0;
         }
 
-    }, [showConfetti, canPlayAudio]);
+    }, [playWon, canPlayAudio]);
 
     useEffect(() => {
         if (audioRef.current) {

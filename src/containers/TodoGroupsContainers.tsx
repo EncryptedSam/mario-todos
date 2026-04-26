@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import NavBar from '../components/NavBar'
 import AddNewButton from '../components/AddNewButton'
 import { createGroup, getGroupsWithStats, updateGroup, deleteGroup, bulkUpdateGroupOrder } from '../services/todoGroup.service'
 import type { TodoGroupWithStats } from '../db/schema'
@@ -12,8 +11,10 @@ import NewlineToast from '../components/NewlineToast'
 import KeybindingTableModal from '../components/KeybindingTableModal'
 import ReactConfetti from 'react-confetti'
 import useConfirmResolver from '../hooks/useConfirmResolver'
+import NavBar from '../components/NavBar'
 
 const areAllGroupsCompleted = (groups: TodoGroupWithStats[]) => {
+    if (groups.length == 0) return false;
     return groups.every(group => {
         if (group.total === 0) return false;
         return group.completed === group.total;
@@ -141,7 +142,7 @@ const TodoGroupsContainers = () => {
                 volumeValue={(localVolume / 100) * 1}
                 confettiValue={showConfetti}
                 onClickConfetti={handleConfetti}
-                showConfetti={allGroupsCompleted}
+                playWon={allGroupsCompleted}
                 onClickHotKeys={() => { setShowHotKeys(true) }}
             />
 

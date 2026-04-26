@@ -39,7 +39,7 @@ const VolumeSlider = ({ className, onChange, value }: Props) => {
     }
 
     return (
-        <div className={`flex h-7.5 px-2 items-center gap-2 bg-gray-100 rounded-full border border-gray-200 ${className}`}>
+        <div className={`inline-flex h-7.5 px-2 items-center gap-2 bg-gray-100 rounded-full border border-gray-200 ${className}`}>
             {volume == 0 ?
                 <RiVolumeMuteLine className="text-gray-600 shrink-0" size={18} />
                 :

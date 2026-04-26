@@ -16,9 +16,6 @@ import KeybindingTableModal from '../components/KeybindingTableModal'
 import NewlineToast from '../components/NewlineToast'
 import useConfirmResolver from '../hooks/useConfirmResolver'
 
-
-
-
 const TodoItemsContainers = () => {
     const navigate = useNavigate();
     const { id: groupId } = useParams();
@@ -206,7 +203,7 @@ const TodoItemsContainers = () => {
                 onClickBack={() => { navigate(`/`); }}
                 confettiValue={showConfetti}
                 onClickConfetti={handleConfetti}
-                showConfetti={percentage == 100}
+                playWon={percentage == 100}
                 onClickHotKeys={() => { setShowHotKeys(true) }}
             />
             <div className='relative  pt-2 pb-2 min-h-0 scroll-hidden overflow-auto' >
