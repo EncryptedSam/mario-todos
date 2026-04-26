@@ -18,6 +18,7 @@ const keybindings = [
     { key: ["Down"], action: "Go to next task/group" },
     { key: ["Alt", "Up"], action: "Move task/group up" },
     { key: ["Alt", "Down"], action: "Move task/group down" },
+    { key: ["Alt", "N"], action: "Create a new task/group" },
     { key: ["Ctrl", "Enter"], action: "Open group" },
     { key: ["Backspace", "Backspace"], action: "Show delete confirmation modal" },
     { key: ["Backspace"], action: "Go back to home when no task is selected" },
