@@ -13,6 +13,8 @@ export interface Props {
     onEmptyDelete?(): void;
     onUp?(): void;
     onDown?(): void;
+    onAltUp?(): void;
+    onAltDown?(): void;
     onDelete?(): void;
     volume?: number
 
@@ -50,7 +52,8 @@ const TodoItemCard = ({
     onDragLeave,
     onDragEnd,
     hide,
-    onEmptyDelete,
+    onAltUp,
+    onAltDown,
     onUp,
     onDown,
     onClickFocus,
@@ -196,6 +199,18 @@ const TodoItemCard = ({
             e.preventDefault();
             onHitEnter?.();
             setIsEdit(false);
+            return;
+        }
+
+        if (e.key === "ArrowUp" && !e.altKey) {
+            e.preventDefault();
+            onAltUp?.();
+            return;
+        }
+
+        if (e.key === "ArrowDown" && !e.altKey) {
+            e.preventDefault();
+            onAltDown?.();
             return;
         }
 

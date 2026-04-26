@@ -15,6 +15,46 @@ function move<T>(arr: T[], selectedIndex: number, movedToIndex: number): T[] {
     return result;
 }
 
+type ReorderParams = {
+    from: {
+        index: number;
+        sortOrder: number;
+    };
+    to?: {
+        index?: number;
+        sortOrder?: number;
+    };
+};
+
+type WithIdAndSort = {
+    id?: number;
+    sortOrder: number;
+};
+
+function areArraysEqualByIdAndSort<T extends WithIdAndSort>(
+    a: T[],
+    b: T[]
+): boolean {
+    if (a.length !== b.length) return false;
+
+    const map = new Map<number, number>();
+
+    for (const item of a) {
+        if (item.id == null) return false;
+        map.set(item.id, item.sortOrder);
+    }
+
+    for (const item of b) {
+        if (item.id == null) return false;
+        if (!map.has(item.id)) return false;
+        if (map.get(item.id) !== item.sortOrder) return false;
+    }
+
+    return true;
+}
+
+type FixedGroup = Omit<TodoGroupWithStats, "id"> & { id: number };
+
 interface Props {
     data?: TodoGroupWithStats[];
 
@@ -50,10 +90,11 @@ const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDele
     const [overIndex, setOverIndex] = useState<number | null>(null);
     const scrollSpeed = 10;
     const scrollThreshold = 80;
-
+    const isSortingRef = useRef<boolean>(false);
 
     useEffect(() => {
         setGroups(data);
+        isSortingRef.current = false;
     }, [data])
 
     const handleDragStart = (e: React.DragEvent<HTMLDivElement>, dragSortOrder: number, dragIndex: number) => {
@@ -110,7 +151,7 @@ const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDele
         }
 
         if (groups && typeof dragSortOrder == 'number' && typeof hoverSortOrder == 'number' && dragIndex != overIndex) {
-            type FixedGroup = Omit<TodoGroupWithStats, "id"> & { id: number };
+
             let reordered = reorderByIndex<FixedGroup>(groups as FixedGroup[], dragSortOrder, hoverSortOrder);
             onReorder?.(reordered);
         }
@@ -136,6 +177,38 @@ const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDele
         }
     };
 
+    const handleAltReorder = ({ from, to }: ReorderParams) => {
+        if (isReordering) return;
+
+        const toSortOrder = to?.sortOrder;
+        if (typeof toSortOrder !== 'number') return;
+        if (typeof data == 'undefined') return;
+        if (typeof groups == 'undefined') return;
+        if (!areArraysEqualByIdAndSort(data, groups)) return;
+        if (isSortingRef.current) return;
+        isSortingRef.current = true;
+
+        setGroups(prev => {
+            if (!prev) return prev;
+
+            const fromIndex = prev.findIndex(g => g.sortOrder === from.sortOrder);
+            const toIndex = prev.findIndex(g => g.sortOrder === toSortOrder);
+
+            if (fromIndex === -1 || toIndex === -1) return prev;
+            if (fromIndex === toIndex) return prev;
+
+            const tempReorder = move(prev, fromIndex, toIndex);
+
+            const reordered = reorderByIndex<FixedGroup>(
+                tempReorder as FixedGroup[],
+                from.sortOrder,
+                toSortOrder
+            );
+
+            onReorder?.(reordered);
+            return tempReorder;
+        });
+    };
 
 
     return (
@@ -146,8 +219,15 @@ const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDele
             {
                 groups?.map(({ id, title, completed, total, sortOrder }, idx) => {
 
+                    let prevSortOrder: number | undefined;
+                    let nextSortOrder: number | undefined;
+
+                    let prevIndex: number | undefined;
+                    let nextIndex: number | undefined;
+
                     let prevFocusId: number | undefined;
                     let nextFocusId: number | undefined;
+
                     let deleteFocusId: number | undefined;
 
                     if (groups.length > 0) {
@@ -167,8 +247,43 @@ const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDele
                     if (groups.length > 1) {
                         if (idx < groups.length - 1) {
                             deleteFocusId = groups[idx + 1].id;
+
                         } else {
                             deleteFocusId = groups[idx - 1].id;
+                        }
+                    }
+
+                    if (idx > 0) {
+
+                        prevSortOrder = groups[idx - 1].sortOrder;
+                        prevIndex = idx - 1;
+                    }
+
+                    if (idx < groups.length - 1) {
+                        nextSortOrder = groups[idx + 1].sortOrder;
+                        nextIndex = idx + 1;
+                    }
+
+
+                    let altUpArgs: ReorderParams = {
+                        from: {
+                            sortOrder,
+                            index: idx
+                        },
+                        to: {
+                            sortOrder: prevSortOrder,
+                            index: prevIndex
+                        }
+                    }
+
+                    let altDownArgs: ReorderParams = {
+                        from: {
+                            sortOrder,
+                            index: idx
+                        },
+                        to: {
+                            sortOrder: nextSortOrder,
+                            index: nextIndex
                         }
                     }
 
@@ -191,6 +306,10 @@ const TodoGroups = ({ data, onChange, onDelete, onClick, onHitEnter, onEmptyDele
                             onHitEnter={() => { onHitEnter(sortOrder + 1) }}
                             onUp={() => { onUp?.(prevFocusId) }}
                             onDown={() => { onDown?.(nextFocusId) }}
+
+                            onAltUp={() => { handleAltReorder(altUpArgs) }}
+                            onAltDown={() => { handleAltReorder(altDownArgs) }}
+
                             onClickFocus={() => { onClickFocus?.(Number(id)) }}
                             onClearFocus={() => { onClearFocus?.(Number(id)) }}
 

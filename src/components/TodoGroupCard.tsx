@@ -19,6 +19,8 @@ interface Props {
     onEmptyDelete?(): void;
     onUp?(): void;
     onDown?(): void;
+    onAltUp?(): void;
+    onAltDown?(): void;
 
     focus?: boolean;
     isDeleting?: boolean;
@@ -54,6 +56,8 @@ const TodoGroupCard = ({
     onDragEnd,
     onUp,
     onDown,
+    onAltUp,
+    onAltDown,
     onHitEnter,
     focus,
     isDeleting,
@@ -180,10 +184,22 @@ const TodoGroupCard = ({
         const cursorStart = el.selectionStart;
         const cursorEnd = el.selectionEnd;
         const length = el.value.length;
-        
+
         if (e.key === "Enter" && e.ctrlKey) {
             e.preventDefault();
             onCtrolEnter?.();
+            return;
+        }
+
+        if (e.key === "ArrowUp" && e.altKey) {
+            e.preventDefault();
+            onAltUp?.();
+            return;
+        }
+
+        if (e.key === "ArrowDown" && e.altKey) {
+            e.preventDefault();
+            onAltDown?.();
             return;
         }
 
