@@ -25,13 +25,11 @@ const NavBar = ({ volumeSlider, onChangeFilter, onClickBack, confettiValue, onCl
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const [canPlayAudio, setCanPlayAudio] = useState(false);
 
-
-    // create audio once
     useEffect(() => {
         audioRef.current = new Audio(wonSound);
     }, []);
 
-    // unlock audio on first user interaction
+
     useEffect(() => {
         const unlock = () => {
             const audio = audioRef.current;
@@ -53,7 +51,6 @@ const NavBar = ({ volumeSlider, onChangeFilter, onClickBack, confettiValue, onCl
         return () => window.removeEventListener("click", unlock);
     }, []);
 
-    // play when confetti shows
     useEffect(() => {
         const audio = audioRef.current;
         if (!audio) return;
@@ -65,6 +62,14 @@ const NavBar = ({ volumeSlider, onChangeFilter, onClickBack, confettiValue, onCl
             audio.pause();
             audio.currentTime = 0;
         }
+
+        return () => {
+            const audio = audioRef.current;
+            if (!audio) return;
+            audio.pause();
+            audio.currentTime = 0;
+        }
+
     }, [showConfetti, canPlayAudio]);
 
     useEffect(() => {

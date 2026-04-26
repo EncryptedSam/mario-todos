@@ -4,6 +4,7 @@ import reorderByIndex from '../utils/reorderByIndex';
 import createClone from '../utils/createClone';
 import { EmptyStateBackground } from './EmptyStateBackground';
 import ReorderingOverlay from './ReorderingOverlay';
+import areArraysEqualByIdAndSort from '../utils/areArraysEqualByIdAndSort';
 
 function move<T>(arr: T[], selectedIndex: number, movedToIndex: number): T[] {
     const result = [...arr];
@@ -13,6 +14,17 @@ function move<T>(arr: T[], selectedIndex: number, movedToIndex: number): T[] {
 
     return result;
 }
+
+type ReorderParams = {
+    from: {
+        index: number;
+        sortOrder: number;
+    };
+    to?: {
+        index?: number;
+        sortOrder?: number;
+    };
+};
 
 
 type Item = { id: number, sortOrder: number, value: string, checked: boolean };
@@ -46,7 +58,7 @@ export interface Props {
 }
 
 
-const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEnter, focusId, onReorder, onEmptyDelete, isEmpty, onCreateNew, isLoading, deleteId, onUp, onDown, onClickFocus, onClearFocus, isReordering }: Props) => {
+const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEnter, focusId, onReorder, isEmpty, onCreateNew, isLoading, deleteId, onUp, onDown, onClickFocus, onClearFocus, isReordering }: Props) => {
     const [items, setItems] = useState<Props['data']>(data);
     const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -55,12 +67,14 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
     const [hoverSortOrder, setHoverSortOrder] = useState<number | null>(null);
     const [dragIndex, setDragIndex] = useState<number | null>(null);
     const [overIndex, setOverIndex] = useState<number | null>(null);
+    const isSortingRef = useRef<boolean>(false);
 
     const scrollSpeed = 10;
     const scrollThreshold = 80;
 
     useEffect(() => {
         setItems(data);
+        isSortingRef.current = false;
     }, [data])
 
 
@@ -143,6 +157,42 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
         setHoverSortOrder(null);
     };
 
+    const handleAltReorder = ({ from, to }: ReorderParams) => {
+        if (isReordering) return;
+
+        console.log(to);
+
+        const toSortOrder = to?.sortOrder;
+        if (typeof toSortOrder !== 'number') return;
+        if (typeof data == 'undefined') return;
+        if (typeof items == 'undefined') return;
+        if (!areArraysEqualByIdAndSort(data, items)) return;
+        if (isSortingRef.current) return;
+        isSortingRef.current = true;
+
+        setItems(prev => {
+            if (!prev) return prev;
+
+            const fromIndex = prev.findIndex(g => g.sortOrder === from.sortOrder);
+            const toIndex = prev.findIndex(g => g.sortOrder === toSortOrder);
+
+            if (fromIndex === -1 || toIndex === -1) return prev;
+            if (fromIndex === toIndex) return prev;
+
+            const tempReorder = move(prev, fromIndex, toIndex);
+
+            const reordered = reorderByIndex<Item>(
+                tempReorder as Item[],
+                from.sortOrder,
+                toSortOrder
+            );
+
+            onReorder?.(reordered);
+            return tempReorder;
+        });
+    };
+
+
     return (
         <div
             ref={containerRef}
@@ -150,6 +200,12 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
         >
             {
                 items?.map(({ id, sortOrder, value, checked }, idx) => {
+
+                    let prevSortOrder: number | undefined;
+                    let nextSortOrder: number | undefined;
+
+                    let prevIndex: number | undefined;
+                    let nextIndex: number | undefined;
 
                     let prevFocusId: number | undefined;
                     let nextFocusId: number | undefined;
@@ -178,6 +234,41 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
                         }
                     }
 
+                    if (idx > 0) {
+
+                        prevSortOrder = items[idx - 1].sortOrder;
+                        prevIndex = idx - 1;
+                    }
+
+                    if (idx < items.length - 1) {
+                        nextSortOrder = items[idx + 1].sortOrder;
+                        nextIndex = idx + 1;
+                    }
+
+
+
+                    let altUpArgs: ReorderParams = {
+                        from: {
+                            sortOrder,
+                            index: idx
+                        },
+                        to: {
+                            sortOrder: prevSortOrder,
+                            index: prevIndex
+                        }
+                    }
+
+                    let altDownArgs: ReorderParams = {
+                        from: {
+                            sortOrder,
+                            index: idx
+                        },
+                        to: {
+                            sortOrder: nextSortOrder,
+                            index: nextIndex
+                        }
+                    }
+
                     return (
                         <TodoItemCard
                             key={`${id}_${sortOrder}`}
@@ -189,6 +280,9 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
 
                             volume={volume}
                             hide={sortOrder == dragSortOrder}
+
+                            onAltUp={() => { handleAltReorder(altUpArgs) }}
+                            onAltDown={() => { handleAltReorder(altDownArgs) }}
 
                             onChangeText={(value) => { onChangeText(id, value) }}
                             onClickCheck={(value) => { onClickCheck(id, value) }}

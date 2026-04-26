@@ -12,11 +12,14 @@ interface Props {
 }
 
 const keybindings = [
-    { key: ["Backspace"], action: "Double press to delete empty" },
     { key: ["Ctrl", "Up"], action: "Jump to previous" },
     { key: ["Ctrl", "Down"], action: "Jump to next" },
-    { key: ["Up"], action: "Previous task/group" },
-    { key: ["Down"], action: "Next task/group" },
+    { key: ["Up"], action: "Go to previous task/group" },
+    { key: ["Down"], action: "Go to next task/group" },
+    { key: ["Alt", "Up"], action: "Move task/group up" },
+    { key: ["Alt", "Down"], action: "Move task/group down" },
+    { key: ["Ctrl", "Enter"], action: "Open group" },
+    { key: ["Backspace", "Backspace"], action: "Show delete confirmation modal" },
 ];
 
 
@@ -60,7 +63,7 @@ function KeybindingTableModal({ data = keybindings, onClose }: Props) {
                                             {item.key.map((key, idx) => {
                                                 return (
                                                     <button
-                                                        className="text-[sm] font-mono! bg-gray-300 px-1.5 py-px rounded-sm border-0 border-b-2 border-gray-400"
+                                                        className="text-[sm] font-mono! bg-gray-300 px-1.5 py-px rounded-sm border-0 border-b-2 border-gray-400 text-nowrap"
                                                         key={`${idx}`}
                                                     >
                                                         {key}

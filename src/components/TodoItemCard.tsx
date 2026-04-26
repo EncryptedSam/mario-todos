@@ -202,13 +202,13 @@ const TodoItemCard = ({
             return;
         }
 
-        if (e.key === "ArrowUp" && !e.altKey) {
+        if (e.key === "ArrowUp" && e.altKey) {
             e.preventDefault();
             onAltUp?.();
             return;
         }
 
-        if (e.key === "ArrowDown" && !e.altKey) {
+        if (e.key === "ArrowDown" && e.altKey) {
             e.preventDefault();
             onAltDown?.();
             return;

@@ -5,6 +5,7 @@ import createClone from '../utils/createClone';
 import reorderByIndex from '../utils/reorderByIndex';
 import { EmptyStateBackground } from './EmptyStateBackground';
 import ReorderingOverlay from './ReorderingOverlay';
+import areArraysEqualByIdAndSort from '../utils/areArraysEqualByIdAndSort';
 
 function move<T>(arr: T[], selectedIndex: number, movedToIndex: number): T[] {
     const result = [...arr];
@@ -25,33 +26,6 @@ type ReorderParams = {
         sortOrder?: number;
     };
 };
-
-type WithIdAndSort = {
-    id?: number;
-    sortOrder: number;
-};
-
-function areArraysEqualByIdAndSort<T extends WithIdAndSort>(
-    a: T[],
-    b: T[]
-): boolean {
-    if (a.length !== b.length) return false;
-
-    const map = new Map<number, number>();
-
-    for (const item of a) {
-        if (item.id == null) return false;
-        map.set(item.id, item.sortOrder);
-    }
-
-    for (const item of b) {
-        if (item.id == null) return false;
-        if (!map.has(item.id)) return false;
-        if (map.get(item.id) !== item.sortOrder) return false;
-    }
-
-    return true;
-}
 
 type FixedGroup = Omit<TodoGroupWithStats, "id"> & { id: number };
 
