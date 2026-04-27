@@ -73,7 +73,6 @@ const TodoGroupsContainers = () => {
                 setFocusId(id);
             }
             isCreatingRef.current = false;
-            play('newtask')
         }
     }
 

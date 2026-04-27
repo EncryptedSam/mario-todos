@@ -197,6 +197,12 @@ const TodoItemCard = ({
         const cursorEnd = el.selectionEnd;
         const length = el.value.length;
 
+        if ((e.key === " " || e.code === "Space") && e.ctrlKey) {
+            e.preventDefault();
+            handleCheck();
+            return;
+        }
+
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
             onHitEnter?.();

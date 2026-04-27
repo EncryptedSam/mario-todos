@@ -104,7 +104,6 @@ const TodoItemsContainers = () => {
                 setFocusId(id);
             }
             isCreatingRef.current = false;
-            play('newtask')
         }
     }
 
