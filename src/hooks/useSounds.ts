@@ -7,15 +7,16 @@ export const useSounds = () => {
   const volumeRef = useRef<number>(0.5);
 
   useEffect(() => {
-    const modules = import.meta.glob("/src/assets/sounds/*.mp3", {
+    const modules = import.meta.glob("../assets/sounds/*.mp3", {
       eager: true,
-      as: "url",
-    }) as Record<string, string>;
+    });
 
     const sounds: SoundMap = {};
 
-    Object.entries(modules).forEach(([path, url]) => {
+    Object.entries(modules).forEach(([path, mod]) => {
       const name = path.split("/").pop()?.replace(".mp3", "") || "";
+
+      const url = (mod as any).default;
 
       const audio = new Audio(url);
       audio.preload = "auto";
@@ -23,7 +24,6 @@ export const useSounds = () => {
 
       sounds[name] = audio;
     });
-
     soundsRef.current = sounds;
   }, []);
 
@@ -42,8 +42,13 @@ export const useSounds = () => {
     if (!sound) return;
 
     sound.currentTime = 0;
-    sound.volume = volumeRef.current;
-    sound.play().catch(() => {});
+
+    const promise = sound.play();
+    if (promise) {
+      promise.catch((e) => {
+        console.log("Audio blocked:", e);
+      });
+    }
   };
 
   const stop = (name: string) => {
