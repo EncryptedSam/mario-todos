@@ -22,6 +22,7 @@ const keybindings = [
     { key: ["Ctrl", "Enter"], action: "Open group" },
     { key: ["Backspace", "Backspace"], action: "Show delete confirmation modal" },
     { key: ["Backspace"], action: "Go back to home when no task is selected" },
+    { key: ["Ctrl", "Space"], action: "To toggle checkbox" }
 ];
 
 

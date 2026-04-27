@@ -158,8 +158,6 @@ const TodoItems = ({ data, onDelete, volume, onChangeText, onClickCheck, onHitEn
     const handleAltReorder = ({ from, to }: ReorderParams) => {
         if (isReordering) return;
 
-        console.log(to);
-
         const toSortOrder = to?.sortOrder;
         if (typeof toSortOrder !== 'number') return;
         if (typeof data == 'undefined') return;
