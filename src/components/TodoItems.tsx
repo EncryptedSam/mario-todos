@@ -49,8 +49,6 @@ export interface Props {
     onClickFocus?: (itemId: number) => void;
     onClearFocus?: (itemId: number) => void;
 
-    onEmptyDelete?: (itemId: number, focusId?: number) => void;
-
     isEmpty?: boolean;
     onCreateNew?(): void;
     isLoading?: boolean;

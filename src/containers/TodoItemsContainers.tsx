@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { getGroupByIdWithStats, updateGroup } from '../services/todoGroup.service'
 import { useParams } from "react-router-dom";
 import type { TodoGroupWithStats, TodoItem } from '../db/schema'
-import { getVolume, setVolume, getConfetti, setConfetti } from '../services/settings.service'
+import { getVolume, setVolume as setVolumeDb, getConfetti, setConfetti } from '../services/settings.service'
 import { getItemsByGroup, createItem, bulkUpdateItemOrder, updateItemCompleted, updateItemContent, deleteItem } from '../services/todoItem.service'
 import Confetti from 'react-confetti'
 import DeleteAlertModal from '../components/DeleteAlertModal'
@@ -16,6 +16,7 @@ import KeybindingTableModal from '../components/KeybindingTableModal'
 import NewlineToast from '../components/NewlineToast'
 import useConfirmResolver from '../hooks/useConfirmResolver'
 import useAltN from '../hooks/useAltN'
+import { useSounds } from '../hooks/useSounds'
 
 const TodoItemsContainers = () => {
     const navigate = useNavigate();
@@ -37,6 +38,7 @@ const TodoItemsContainers = () => {
     const { onConfirm, onCancel, confirm } = useConfirmResolver();
     const isReorderingRef = useRef<boolean>(false);
     const isCreatingRef = useRef<boolean>(false);
+    const { play, stop, setVolume } = useSounds();
 
     useEscape(() => {
         setDeleteId(undefined);
@@ -102,6 +104,7 @@ const TodoItemsContainers = () => {
                 setFocusId(id);
             }
             isCreatingRef.current = false;
+            play('newtask')
         }
     }
 
@@ -140,23 +143,15 @@ const TodoItemsContainers = () => {
             await loadItems();
             await loadGroup();
             setFocusId(focusId);
+            play('stomp');
         }
         setDeleteId(undefined)
     }
 
-    const handleDeleteItemOnEmpty = async (id: number, focusId?: number) => {
-        await deleteItem(id);
-        await loadItems();
-        await loadGroup();
-        setDeleteId(undefined)
-        if (focusId) {
-            setFocusId(focusId);
-        }
-    }
 
     const handleVolume = async (value: number) => {
         setLocalVolume(value);
-        setVolume(value);
+        setVolumeDb(value);
     }
 
     const handleConfetti = async () => {
@@ -178,7 +173,7 @@ const TodoItemsContainers = () => {
             .filter(({ completed }) => {
                 if (filter === 'completed') return completed;
                 if (filter === 'pending') return !completed;
-                return true; // 'all'
+                return true;
             })
             .map(({ completed, content, sortOrder, id }) => {
                 return {
@@ -194,21 +189,38 @@ const TodoItemsContainers = () => {
         handleCreateItem();
     });
 
+    useEffect(() => {
+        if (typeof localVolume == 'number') {
+            setVolume((localVolume / 100) * 1);
+        }
+    }, [localVolume])
+
+    useEffect(() => {
+        if (percentage == 100) {
+            play('taskswon')
+        }
+
+        if (percentage < 100) {
+            stop('taskswon')
+        }
+
+        return () => {
+            stop('taskswon')
+        }
+    }, [percentage])
+
+
     return (
         <>
             <NavBar
                 onChangeFilter={setFilter}
 
-                volumeSlider={{
-                    value: localVolume,
-                    onChange: (value) => { handleVolume(value) }
-                }}
+                volumeValue={localVolume}
+                onChangeVolume={handleVolume}
 
-                volumeValue={(localVolume / 100) * 1}
                 onClickBack={() => { navigate(`/`); }}
                 confettiValue={showConfetti}
                 onClickConfetti={handleConfetti}
-                playWon={percentage == 100}
                 onClickHotKeys={() => { setShowHotKeys(true) }}
             />
             <div className='relative  pt-2 pb-2 min-h-0 scroll-hidden overflow-auto' >
@@ -241,14 +253,14 @@ const TodoItemsContainers = () => {
                 onChangeText={(id, value) => { handleUpdateContent(id, value) }}
                 onClickCheck={(id, value) => { handleUpdateCompleted(id, value) }}
                 onHitEnter={(sortOrder) => { setShowNewLineToast(true); handleCreateItem(sortOrder) }}
-                onEmptyDelete={handleDeleteItemOnEmpty}
+
                 onReorder={handleBulkReorder}
                 isEmpty={items.length == 0}
                 onCreateNew={() => { handleCreateItem() }}
                 isLoading={isLoading}
                 isReordering={isReorderingRef.current}
-                onUp={(value) => { setFocusId(value) }}
-                onDown={(value) => { setFocusId(value) }}
+                onUp={(value) => { setFocusId(value); }}
+                onDown={(value) => { setFocusId(value); }}
                 deleteId={deleteId}
 
                 focusId={typeof deleteId == 'number' ? undefined : focusId}

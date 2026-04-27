@@ -3,7 +3,7 @@ import AddNewButton from '../components/AddNewButton'
 import { createGroup, getGroupsWithStats, updateGroup, deleteGroup, bulkUpdateGroupOrder } from '../services/todoGroup.service'
 import type { TodoGroupWithStats } from '../db/schema'
 import { useNavigate } from 'react-router-dom'
-import { getVolume, setConfetti, setVolume } from '../services/settings.service'
+import { getVolume, setConfetti, setVolume as setVolumeDb } from '../services/settings.service'
 import TodoGroups from '../components/TodoGroups'
 import DeleteAlertModal from '../components/DeleteAlertModal'
 import useEscape from '../hooks/useEscape'
@@ -13,6 +13,7 @@ import ReactConfetti from 'react-confetti'
 import useConfirmResolver from '../hooks/useConfirmResolver'
 import NavBar from '../components/NavBar'
 import useAltN from '../hooks/useAltN'
+import { useSounds } from '../hooks/useSounds'
 
 const areAllGroupsCompleted = (groups: TodoGroupWithStats[]) => {
     if (groups.length == 0) return false;
@@ -35,6 +36,7 @@ const TodoGroupsContainers = () => {
     const isCreatingRef = useRef<boolean>(false);
     const isReorderingRef = useRef<boolean>(false);
     const { onConfirm, onCancel, confirm } = useConfirmResolver();
+    const { play, stop, setVolume } = useSounds();
     const navigate = useNavigate();
 
     useEscape(() => {
@@ -71,6 +73,7 @@ const TodoGroupsContainers = () => {
                 setFocusId(id);
             }
             isCreatingRef.current = false;
+            play('newtask')
         }
     }
 
@@ -87,22 +90,14 @@ const TodoGroupsContainers = () => {
             await deleteGroup(groupId);
             await loadRows();
             setFocusId(focusId);
+            play('stomp');
         }
         setDeleteId(undefined)
     }
 
     const handleVolume = async (value: number) => {
         setLocalVolume(value);
-        setVolume(value);
-    }
-
-    const handleDeleteItemOnEmpty = async (id: number, focusId?: number) => {
-        await deleteGroup(id);
-        await loadRows();
-        setDeleteId(undefined)
-        if (typeof focusId == 'number') {
-            setFocusId(focusId);
-        }
+        setVolumeDb(value);
     }
 
     const handleBulkReorder = async (items: { id: number; sortOrder: number }[]) => {
@@ -136,29 +131,47 @@ const TodoGroupsContainers = () => {
 
     const allGroupsCompleted = areAllGroupsCompleted(groups);
 
+    useEffect(() => {
+        if (typeof localVolume == 'number') {
+            setVolume((localVolume / 100) * 1);
+        }
+    }, [localVolume])
+
+    useEffect(() => {
+        if (allGroupsCompleted) {
+            play('groupswon')
+        }
+
+        if (!allGroupsCompleted) {
+            stop('groupswon')
+        }
+
+        return () => {
+            stop('groupswon')
+        }
+    }, [allGroupsCompleted])
+
     return (
         < >
             <NavBar
                 onChangeFilter={setFilter}
-                volumeSlider={{
-                    value: localVolume,
-                    onChange: (value) => { handleVolume(value) }
-                }}
 
-                volumeValue={(localVolume / 100) * 1}
+                volumeValue={localVolume}
+                onChangeVolume={handleVolume}
+
                 confettiValue={showConfetti}
                 onClickConfetti={handleConfetti}
-                playWon={allGroupsCompleted}
                 onClickHotKeys={() => { setShowHotKeys(true) }}
             />
 
             <TodoGroups
                 data={filteredGroups}
                 onChange={(id, value) => { handleCardChange(Number(id), value) }}
+
                 onDelete={(id, focusId) => { handleDeleteGroup(id, focusId) }}
-                onClick={(id) => { navigate(`/group/${id}/`); }}
+                onClick={(id) => { navigate(`/group/${id}/`); play('pipe'); }}
                 onHitEnter={(sortOrder) => { setShowNewLineToast(true); handleCreateGroup(sortOrder) }}
-                onEmptyDelete={handleDeleteItemOnEmpty}
+
                 onUp={(value) => { setFocusId(value) }}
                 onDown={(value) => { setFocusId(value) }}
                 onReorder={handleBulkReorder}

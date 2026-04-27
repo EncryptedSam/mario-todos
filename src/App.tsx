@@ -1,21 +1,8 @@
 import { Route, Routes } from 'react-router-dom';
 import TodoGroupsPage from './pages/TodoGroupsPage';
 import TodoItemsPage from './pages/TodoItemsPage';
-// import { useEffect } from 'react';
-// import { resetDB } from './db/utils';
-// import ReorderList from './ReorderList';
-
-// useEffect(() => {
-//   const init = async () => {
-//     await resetDB();
-//   };
-
-//   init();
-// }, []);
-
 
 function App() {
-
 
   return (
     <Routes>
@@ -26,3 +13,5 @@ function App() {
 }
 
 export default App
+
+

@@ -1,87 +1,28 @@
 import { useEffect, useRef, useState } from 'react'
 import { IoChevronBack } from 'react-icons/io5'
 import DropDown from './DropDown';
-import VolumeSlider, { type Props as VolumeProps } from './VolumeSlider';
+import VolumeSlider from './VolumeSlider';
 import { TbConfetti, TbKeyboard, TbSettings } from 'react-icons/tb';
-import wonSound from "../assets/sounds/mario_won_sound.mp3";
 import useEscape from '../hooks/useEscape';
 import Switch from './ui/Switch';
 
 interface Props {
-    volumeSlider: VolumeProps
     onClickBack?(): void;
     onClickConfetti?(): void;
     confettiValue?: boolean;
-    playWon?: boolean;
     onClickHotKeys?: () => void;
 
+    volumeValue: number;
+    onChangeVolume?(value: number): void;
+
     onVolumeChange?(): void;
-    volumeValue?: number
     onChangeFilter?(value: 'all' | 'pending' | 'completed'): void;
 }
 
-const NavBar = ({ volumeSlider, onChangeFilter, onClickBack, confettiValue, onClickConfetti, playWon, volumeValue, onClickHotKeys }: Props) => {
+const NavBar = ({ onChangeFilter, onClickBack, confettiValue, onClickConfetti, onClickHotKeys, onChangeVolume, volumeValue }: Props) => {
     const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
-    const audioRef = useRef<HTMLAudioElement | null>(null);
-    const [canPlayAudio, setCanPlayAudio] = useState(false);
-
-    useEffect(() => {
-        audioRef.current = new Audio(wonSound);
-    }, []);
 
 
-    useEffect(() => {
-        const unlock = () => {
-            const audio = audioRef.current;
-            if (audio) {
-                audio.play()
-                    .then(() => {
-                        audio.pause();
-                        audio.currentTime = 0;
-                        setCanPlayAudio(true);
-                    })
-                    .catch(() => { });
-            }
-
-            window.removeEventListener("click", unlock);
-        };
-
-        window.addEventListener("click", unlock);
-
-        return () => window.removeEventListener("click", unlock);
-    }, []);
-
-    useEffect(() => {
-        const audio = audioRef.current;
-        if (!audio) return;
-
-        if (playWon && canPlayAudio) {
-            audio.currentTime = 0;
-            audio.play().catch(() => { });
-        } else {
-            audio.pause();
-            audio.currentTime = 0;
-        }
-
-        return () => {
-            const audio = audioRef.current;
-            if (!audio) return;
-            audio.pause();
-            audio.currentTime = 0;
-        }
-
-    }, [playWon, canPlayAudio]);
-
-    useEffect(() => {
-        if (audioRef.current) {
-            const audio = audioRef.current;
-            let volume = 0.3
-            if (typeof volumeValue == 'number') {
-                volume = volumeValue;
-            }
-            audio.volume = volume;
-        }
-    }, [volumeValue]);
 
     return (
         <div className='flex justify-between items-end pt-2 pb-2' >
@@ -112,7 +53,11 @@ const NavBar = ({ volumeSlider, onChangeFilter, onClickBack, confettiValue, onCl
             </div>
 
             <div className='flex items-center space-x-2' >
-                <VolumeSlider className='w-30' {...volumeSlider} />
+                <VolumeSlider
+                    className='w-30'
+                    value={volumeValue}
+                    onChange={onChangeVolume}
+                />
                 <DropDownSettings
                     confettiValue={confettiValue}
                     onClickConfetti={onClickConfetti}

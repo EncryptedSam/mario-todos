@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
-import coinSound from "../assets/sounds/mario_coin_sound.mp3";
 import useEscape from '../hooks/useEscape';
 import { BsTrash } from 'react-icons/bs';
+import { useSounds } from '../hooks/useSounds';
 
 export interface Props {
     value: string
@@ -67,6 +67,7 @@ const TodoItemCard = ({
     const [isEdit, setIsEdit] = useState<boolean>(false);
     const backspaceCountRef = useRef(0);
     const isTextAreaSelectedRef = useRef<boolean>(false);
+    const { play, stop, setVolume } = useSounds();
 
 
     const MAX_ROWS = -1; // -1 = infinite
@@ -174,9 +175,10 @@ const TodoItemCard = ({
 
         setIsChecked(checked)
         if (checked) {
-            const audio = new Audio(coinSound);
-            audio.volume = volume ?? 0.3;
-            audio.play();
+            setVolume(volume ?? 0.3);
+            play('coin');
+        } else {
+            stop('coin');
         }
         onClickCheck?.(checked);
     };
