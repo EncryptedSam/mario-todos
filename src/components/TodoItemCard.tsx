@@ -24,7 +24,6 @@ export interface Props {
     focus?: boolean;
     isDeleting?: boolean;
 
-    // 👇 drag events
     onDragStart?(e: React.DragEvent<HTMLDivElement>): void;
     onDragOver?(e: React.DragEvent<HTMLDivElement>): void;
     onDrop?(e: React.DragEvent<HTMLDivElement>): void;
