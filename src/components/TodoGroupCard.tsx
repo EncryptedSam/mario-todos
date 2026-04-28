@@ -8,12 +8,13 @@ interface Props {
     value: string;
     hide?: boolean;
 
-
     onChange?(value: string): void;
     onClick?(): void;
 
+    focus?: boolean;
     onClickFocus?(): void;
     onClearFocus?(): void;
+
     onHitEnter?(): void;
     onCtrolEnter?(): void;
     onEmptyDelete?(): void;
@@ -22,7 +23,6 @@ interface Props {
     onAltUp?(): void;
     onAltDown?(): void;
 
-    focus?: boolean;
     isDeleting?: boolean;
     readonly?: boolean;
     total: number;
@@ -267,6 +267,7 @@ const TodoGroupCard = ({
     }
 
     const handleReadonlyDoubleClick = () => {
+        onClickFocus?.();
         setIsReadonlyDisabled(true);
         setIsEdit(true);
     }

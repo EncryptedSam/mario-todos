@@ -27,6 +27,7 @@ const TodoItemsContainers = () => {
     const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
     const [localVolume, setLocalVolume] = useState<number>(0);
     const [focusId, setFocusId] = useState<number | undefined>(undefined);
+    const [focusGroupId, setFocusGroupId] = useState<number | undefined>(undefined);
     const [showConfetti, setShowConfetti] = useState<boolean>(true);
     const [showHotKeys, setShowHotKeys] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -48,7 +49,7 @@ const TodoItemsContainers = () => {
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key === "Backspace") {
-                if (!focusId) {
+                if (typeof focusId == 'undefined' && typeof focusGroupId == 'undefined') {
                     navigate(`/`);
                 }
             }
@@ -59,7 +60,7 @@ const TodoItemsContainers = () => {
         return () => {
             window.removeEventListener("keydown", handleKeyDown);
         };
-    }, [focusId]);
+    }, [focusId, focusGroupId]);
 
     const loadConfetti = async () => {
         const confetti = await getConfetti();
@@ -227,6 +228,9 @@ const TodoItemsContainers = () => {
                     <TodoGroupCard
                         value={group.title ?? ''}
                         completed={group.completed}
+
+                        onClickFocus={() => { setFocusGroupId(group.id) }}
+                        onClearFocus={() => { setFocusGroupId(undefined) }}
 
                         onHitEnter={() => {
                             setShowNewLineToast(true);
